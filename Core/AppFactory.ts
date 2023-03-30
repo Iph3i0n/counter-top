@@ -48,8 +48,14 @@ Server.CreateHandler(
 
           return instance.Send(command, app_id, ...args);
         },
-        open_window: (location: string) => {
-          return Server.Postback("open_window", app_id, location);
+        open_window: (location: string, name: string) => {
+          return Server.Postback("open_window", app_id, location, name);
+        },
+        close_app: async () => {
+          const instance = await RunningApps[app_id];
+          if (!instance) return "not running";
+
+          instance.Close();
         },
       }
     );

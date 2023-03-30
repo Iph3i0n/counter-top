@@ -52,10 +52,11 @@ export default function CreateSocketServer<TContext = any>(
       )(data);
     } catch (err) {
       console.error(err);
-      respond({
-        request_id: data.request_id ?? "unknown",
-        response: "unknown error",
-      });
+      if (socket.readyState === socket.OPEN)
+        respond({
+          request_id: data.request_id ?? "unknown",
+          response: "unknown error",
+        });
     }
   });
 

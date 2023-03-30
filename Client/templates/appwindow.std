@@ -1,6 +1,7 @@
 <s:meta name="os-appwindow">
   <attr name="app_id" type="string"></attr>
   <attr name="name" type="string"></attr>
+  <attr name="location" type="string"></attr>
   <attr name="connection" type="any"></attr>
 </s:meta>
 
@@ -147,6 +148,6 @@
       <s:text use=":title || self.name" />
     </t-paragraph>
   </d-panel>
-  <iframe src=":`/apps/${self.app_id}`" s:ref="iframe"></iframe>
+  <iframe src=":`/apps/${self.app_id}/${self.location}`" s:ref="iframe"></iframe>
   <div class="corner" on:mousedown="on_corner_down"></div>
 </d-panel>

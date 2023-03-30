@@ -49,10 +49,10 @@
           url,
           {},
           {
-            open_window: (app, location) => {
+            open_window: (app, location, name) => {
               document.dispatchEvent(
                 new CustomEvent("COUNTER_TOP_OPEN_WINDOW", {
-                  detail: { app, location },
+                  detail: { app, location, name },
                 })
               );
             },

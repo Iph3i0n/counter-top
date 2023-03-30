@@ -14,8 +14,8 @@ export default function MakeConnection(socket: WebSocket, user_id: string) {
       },
       { user_id },
       {
-        async open_window(app: string, location: string) {
-          return await server.Postback("open_window", app, location);
+        async open_window(app: string, location: string, name: string) {
+          return await server.Postback("open_window", app, location, name);
         },
       }
     );

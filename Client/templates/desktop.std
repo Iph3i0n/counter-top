@@ -7,19 +7,17 @@
 
   const session = await self.connection.Send("execute", "session");
   let state = "open";
-  let running = [];
+  let windows = [];
 
   async function LaunchApp(event) {
     const [id, name] = event.detail;
     toggle_explorer();
-    if (running.includes(id)) return;
     await self.connection.Send("execute", "load_app", id);
-    running.push([id, name]);
   }
 
   function CloseApp(id) {
     return async () => {
-      running = running.filter((r) => r[0] !== id);
+      windows = windows.filter((w) => w.app !== id);
     };
   }
 
@@ -38,7 +36,9 @@
   );
 
   document.addEventListener("COUNTER_TOP_OPEN_WINDOW", (event) => {
-    console.log(event);
+    const { app, location, name } = event.detail;
+    windows.push({ app, location, name });
+    self.should_render();
   });
 </script>
 
@@ -52,12 +52,13 @@
   }
 </style>
 
-<s:for subject=":running" key="[id, name]">
+<s:for subject=":windows" key="{ app, location, name }">
   <os-appwindow
-    app_id=":id"
+    app_id=":app"
     name=":name"
     connection=":self.connection"
-    on:closed="CloseApp(id)"
+    location=":location"
+    on:closed="CloseApp(app)"
   ></os-appwindow>
 </s:for>
 

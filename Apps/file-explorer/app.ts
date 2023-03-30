@@ -29,7 +29,7 @@ const Server = CreateAppServer(
   },
   {},
   (c) => {
-    Server.Postback("open_window", "index.html");
+    Server.Postback("open_window", "index.html", "File Explorer");
     return c;
   }
 );

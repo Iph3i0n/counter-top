@@ -47,5 +47,4 @@ result.Write({
     ) ?? {},
 });
 
-console.log(AdminUsers);
 export default result;
