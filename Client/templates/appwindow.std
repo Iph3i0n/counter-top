@@ -1,0 +1,152 @@
+<s:meta name="os-appwindow">
+  <attr name="app_id" type="string"></attr>
+  <attr name="name" type="string"></attr>
+  <attr name="connection" type="any"></attr>
+</s:meta>
+
+<script>
+  const iframe = CreateRef();
+  const corner = CreateRef();
+  const bounds = { top: "30px", left: "20px", width: "400px", height: "300px" };
+
+  let title;
+
+  function on_close() {
+    self.dispatchEvent(new CustomEvent("closed"));
+  }
+
+  function on_corner_down(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const instance = iframe.current;
+    instance.style.pointerEvents = "none";
+
+    window.onmousemove = (e) => {
+      instance.style.pointerEvents = "none";
+      bounds.width = e.clientX - self.offsetLeft - 10 + "px";
+      bounds.height = e.clientY - self.offsetTop - 10 + "px";
+      self.style.width = bounds.width;
+      self.style.height = bounds.height;
+    };
+
+    window.onmouseup = () => {
+      instance.style.pointerEvents = "all";
+      window.onmouseup = null;
+      window.onmousemove = null;
+    };
+  }
+
+  $on_mousedown: {
+    const instance = iframe.current;
+    instance.style.pointerEvents = "none";
+    event.preventDefault();
+    let current_x = event.clientX;
+    let current_y = event.clientY;
+
+    window.onmouseup = () => {
+      instance.style.pointerEvents = "all";
+      window.onmouseup = null;
+      window.onmousemove = null;
+    };
+
+    window.onmousemove = (e) => {
+      e.preventDefault();
+      const new_x = current_x - e.clientX;
+      const new_y = current_y - e.clientY;
+      current_x = e.clientX;
+      current_y = e.clientY;
+      bounds.top = self.offsetTop - new_y + "px";
+      bounds.left = self.offsetLeft - new_x + "px";
+      self.style.top = bounds.top;
+      self.style.left = bounds.left;
+    };
+  }
+
+  $load: {
+    const instance = iframe.current;
+    instance.contentWindow.Invoke = function (command, ...args) {
+      return self.connection.Send(
+        "execute",
+        "execute",
+        self.app_id,
+        command,
+        ...args
+      );
+    };
+
+    instance.onload = () => {
+      title = instance.contentDocument.title;
+      self.should_render();
+    };
+  }
+</script>
+
+<style>
+  :host {
+    position: absolute;
+    top: ":bounds.top";
+    left: ":bounds.left";
+    width: ":bounds.width";
+    height: ":bounds.height";
+  }
+
+  iframe {
+    border: none;
+    background: #fff;
+    width: 100%;
+    border-radius: 0.5rem;
+    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.05);
+    flex: 1;
+  }
+
+  .corner {
+    position: absolute;
+    bottom: 0.05rem;
+    right: 0.25rem;
+    width: 0.5rem;
+    height: 0.5rem;
+    background: #000;
+    cursor: se-resize;
+    border-radius: 0.5rem;
+  }
+
+  .close-button {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 1rem;
+    background: #f00;
+    cursor: pointer;
+    box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.2);
+  }
+
+  .main-panel {
+    height: 100%;
+
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  t-paragraph {
+    text-align: center;
+    margin: 0;
+  }
+
+  .title-panel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem;
+  }
+</style>
+
+<d-panel class="main-panel" colour="body" bordered>
+  <d-panel class="title-panel" colour="surface">
+    <div class="close-button" on:click="on_close"></div>
+    <t-paragraph>
+      <s:text use=":title || self.name" />
+    </t-paragraph>
+  </d-panel>
+  <iframe src=":`/apps/${self.app_id}`" s:ref="iframe"></iframe>
+  <div class="corner" on:mousedown="on_corner_down"></div>
+</d-panel>

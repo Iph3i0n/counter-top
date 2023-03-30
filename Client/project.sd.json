@@ -1,0 +1,15 @@
+{
+  "templates": [
+    "./templates/main.std",
+    "./templates/authenticate.std",
+    "./templates/desktop.std",
+    "./templates/appwindow.std",
+    "./templates/app-explorer.std"
+  ],
+  "description": "The main client for the OS",
+  "global_css": "./global.pss",
+  "docs": {
+    "value_sets": []
+  },
+  "package": {}
+}

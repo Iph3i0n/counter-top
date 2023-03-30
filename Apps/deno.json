@@ -1,0 +1,8 @@
+{
+  "tasks": {
+    "fe:build": "(cd ./file-explorer && deno task build)",
+    "fe:dev": "(cd ./file-explorer && deno task dev)",
+    "all:build": "deno task fe:build",
+    "all:dev": "deno task fe:dev"
+  }
+}

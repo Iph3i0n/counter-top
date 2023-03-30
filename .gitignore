@@ -1,0 +1,4 @@
+Server/.env
+Server/.counter-top
+Client/dist
+Apps/*/dist

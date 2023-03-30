@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "lib": ["dom", "deno.worker", "deno.ns", "deno.unstable"],
+    "emitDecoratorMetadata": true
+  },
+  "lint": {
+    "rules": {
+      "exclude": ["no-explicit-any", "no-async-promise-executor"]
+    }
+  },
+  "tasks": {
+    "server:start": "(cd ./Server && deno task start)",
+    "ui:dev": "(cd ./Client && deno task dev)",
+    "ui:build": "(cd ./Client && deno task build)",
+    "apps:dev": "(cd ./Apps && deno task all:dev)",
+    "apps:build": "(cd ./Apps && deno task all:build)"
+  }
+}

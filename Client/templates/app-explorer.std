@@ -1,0 +1,79 @@
+<s:meta name="os-app-explorer">
+  <attr name="connection" type="any"></attr>
+  <attr name="open" type="string"></attr>
+</s:meta>
+
+<script>
+  const apps = await self.connection.Send("execute", "list_apps");
+  let running = [];
+
+  function LaunchApp(detail) {
+    return () => {
+      self.dispatchEvent(new CustomEvent("app_launched", { detail }));
+    };
+  }
+
+  function close_explorer() {
+    self.dispatchEvent(new CustomEvent("explorer_closed"));
+  }
+</script>
+
+<style>
+  :host {
+    background-color: rgba(0, 0, 0, 0.5);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    box-sizing: border-box;
+
+    opacity: ":self.open === 'open' ? '1' : '0'";
+    pointer-events: ":self.open === 'open' ? 'all' : 'none'";
+
+    transition: opacity 200ms;
+  }
+
+  .content {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 10rem;
+  }
+
+  d-panel {
+    width: 12rem;
+    height: 12rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+
+  d-panel t-paragraph {
+    text-align: center;
+  }
+
+  .close-button {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    cursor: pointer;
+  }
+</style>
+
+<div class="close-button">
+  <f-button colour="surface" on:click="close_explorer">
+    <t-icon name="close" colour="surface" text size="h1"></t-icon>
+  </f-button>
+</div>
+
+<div class="content">
+  <s:for subject=":apps" key="[id, name]">
+    <f-button colour="surface" on:click="LaunchApp([id, name])">
+      <img src=":`/apps/${id}/public/icon.svg`" />
+      <t-paragraph>
+        <s:text use=":name" />
+      </t-paragraph>
+    </f-button>
+  </s:for>
+</div>

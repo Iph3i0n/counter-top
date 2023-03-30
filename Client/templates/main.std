@@ -1,0 +1,15 @@
+<s:meta name="os-main"></s:meta>
+
+<script>
+  let connection;
+</script>
+
+<s:if check=":!connection">
+  <os-authenticate
+    on:authenticated="e => connection = e.detail"
+  ></os-authenticate>
+</s:if>
+
+<s:if check="connection">
+  <os-desktop connection=":connection"></os-desktop>
+</s:if>

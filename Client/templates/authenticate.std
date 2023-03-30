@@ -1,0 +1,179 @@
+<s:meta name="os-authenticate"></s:meta>
+
+<script>
+  import SpawnSocket from "../../Interfacing/SocketSpawner.ts";
+  const token_key = "counter_top_auth_token";
+
+  let mode = "login";
+
+  function SetCookie(name, value, days) {
+    var expires = "";
+    if (days) {
+      var date = new Date();
+      date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+      expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "") + expires + "; path=/";
+  }
+
+  function GetCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(";");
+    for (var i = 0; i < ca.length; i++) {
+      var c = ca[i];
+      while (c.charAt(0) == " ") c = c.substring(1, c.length);
+      if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+  }
+
+  const existing = GetCookie(token_key);
+  if (existing)
+    start_connection(existing)
+      .then((c) =>
+        self.dispatchEvent(new CustomEvent("authenticated", { detail: c }))
+      )
+      .catch((err) => console.log("Failed to start connection"));
+
+  function start_connection(token) {
+    return new Promise(async (res, rej) => {
+      SetCookie(token_key, token, 7);
+      const is_https = location.protocol === "https:";
+      const protocol = is_https ? "wss:" : "ws:";
+      const url = `${protocol}//${
+        location.host
+      }/os/session?token=${encodeURIComponent(token)}`;
+
+      res(
+        await SpawnSocket(
+          url,
+          {},
+          {
+            open_window: (app, location) => {
+              document.dispatchEvent(
+                new CustomEvent("COUNTER_TOP_OPEN_WINDOW", {
+                  detail: { app, location },
+                })
+              );
+            },
+          }
+        )
+      );
+    });
+  }
+
+  function on_submit_register(e) {
+    const data = e.FormData;
+
+    fetch("/api/auth/register", {
+      method: "POST",
+      body: JSON.stringify({
+        email: data.email,
+        password: data.password,
+        wallpaper: data.wallpaper,
+      }),
+      headers: {
+        "content-type": "application/json",
+      },
+    })
+      .then((r) => r.json())
+      .then((j) => start_connection(j.token))
+      .then((c) =>
+        self.dispatchEvent(new CustomEvent("authenticated", { detail: c }))
+      )
+      .catch((err) => console.log("Failed to start connection"));
+  }
+
+  function on_submit_login(e) {
+    const data = e.FormData;
+
+    fetch(
+      `/api/auth/token?email=${encodeURIComponent(
+        data.email
+      )}&password=${encodeURIComponent(data.password)}`
+    )
+      .then((r) => r.json())
+      .then((j) => start_connection(j.token))
+      .then((c) =>
+        self.dispatchEvent(new CustomEvent("authenticated", { detail: c }))
+      )
+      .catch((err) => console.log("Failed to start connection"));
+  }
+
+  function on_mode_switch() {
+    if (mode === "login") mode = "register";
+    else mode = "login";
+  }
+</script>
+
+<style>
+  :host {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    padding: 10rem;
+  }
+
+  l-row,
+  t-paragraph {
+    text-align: center;
+  }
+</style>
+
+<s:if check=":mode === 'login'">
+  <l-row>
+    <l-col xs="12">
+      <t-heading level="h1">Login</t-heading>
+      <t-paragraph>Don't have an account?</t-paragraph>
+    </l-col>
+    <l-col xs="12">
+      <f-button type="button" on:click="on_mode_switch">Register</f-button>
+    </l-col>
+  </l-row>
+  <f-form submit="event-only" on:Submitted="on_submit_login">
+    <l-row>
+      <l-col xs="12">
+        <f-input type="email" name="email">Email</f-input>
+      </l-col>
+      <l-col xs="12">
+        <f-input type="text" name="password" sensitive>Password</f-input>
+      </l-col>
+      <l-col xs="12">
+        <f-button type="submit">Login</f-button>
+      </l-col>
+    </l-row>
+  </f-form>
+</s:if>
+
+<s:if check=":mode === 'register'">
+  <l-row>
+    <l-col xs="12">
+      <t-heading level="h1">Register</t-heading>
+      <t-paragraph>Already have an account?</t-paragraph>
+    </l-col>
+    <l-col xs="12">
+      <f-button type="button" on:click="on_mode_switch">Login</f-button>
+    </l-col>
+  </l-row>
+  <f-form submit="event-only" on:Submitted="on_submit_register">
+    <l-row>
+      <l-col xs="12">
+        <f-input type="email" name="email">Email</f-input>
+      </l-col>
+      <l-col xs="12">
+        <f-input type="text" name="password" sensitive>Password</f-input>
+      </l-col>
+      <l-col xs="12">
+        <f-singleselect name="wallpaper">
+          <span slot="label">Wallpaper</span>
+          <option value="open-photo.jpeg">Coffee Shop</option>
+        </f-singleselect>
+      </l-col>
+      <l-col xs="12">
+        <f-button type="submit">Register</f-button>
+      </l-col>
+    </l-row>
+  </f-form>
+</s:if>

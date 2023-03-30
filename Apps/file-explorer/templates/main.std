@@ -1,0 +1,154 @@
+<s:meta name="fs-main"></s:meta>
+
+<script>
+  let page_data = await window.Invoke("open_folder");
+  console.log(page_data);
+
+  let mode = "";
+
+  function to_data_url(file) {
+    return new Promise((res, rej) => {
+      const reader = new FileReader();
+      reader.addEventListener("load", (ev) => {
+        res(reader.result);
+      });
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function create_folder(e) {
+    const form = e.FormData;
+
+    const response = await window.Invoke(
+      "create_folder",
+      form.name,
+      page_data.id
+    );
+
+    page_data = await window.Invoke("open_folder", page_data.id);
+    mode = "";
+  }
+
+  async function create_file(e) {
+    const form = e.FormData;
+    for (const file of form.file_data)
+      await window.Invoke(
+        "upload_file",
+        file.name,
+        page_data.id,
+        await to_data_url(file)
+      );
+
+    page_data = await window.Invoke("open_folder", page_data.id);
+    mode = "";
+  }
+
+  function toggle_mode(name) {
+    return () => {
+      if (mode === name) mode = "";
+      else mode = name;
+    };
+  }
+</script>
+
+<style>
+  .button-groups {
+    margin: 0.1rem;
+    display: flex;
+    align-items: center;
+  }
+
+  .button-groups f-button {
+    flex: 1;
+  }
+
+  f-form {
+    width: 100%;
+  }
+
+  .upload-button {
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+  }
+</style>
+
+<div>
+  <s:if check=":mode === 'creating_folder'">
+    <f-form submit="event-only" on:Submitted="create_folder">
+      <l-row>
+        <l-col xs="12">
+          <f-input name="name" type="text">Create a Directory</f-input>
+        </l-col>
+      </l-row>
+    </f-form>
+  </s:if>
+  <s:if check=":mode === 'creating_file'">
+    <f-form submit="event-only" on:Submitted="create_file">
+      <l-row>
+        <l-col xs="12">
+          <f-file name="file_data" multiple>Upload the file</f-file>
+        </l-col>
+        <l-col xs="12">
+          <f-button type="submit" colour="contrast" class="upload-button">
+            Upload
+          </f-button>
+        </l-col>
+      </l-row>
+    </f-form>
+  </s:if>
+  <l-row>
+    <l-col xs="12">
+      <div class="button-groups">
+        <f-button type="button" on:click="toggle_mode('creating_folder')">
+          <t-icon
+            name="folder-add"
+            colour="primary"
+            text
+            size="body_large"
+          ></t-icon>
+        </f-button>
+        <f-button type="button" on:click="toggle_mode('creating_file')">
+          <t-icon
+            name="file-add"
+            colour="primary"
+            text
+            size="body_large"
+          ></t-icon>
+        </f-button>
+      </div>
+    </l-col>
+  </l-row>
+
+  <d-panel colour="surface">
+    <l-row>
+      <l-col xs="12">
+        <t-heading level="h4">Files</t-heading>
+      </l-col>
+      <s:for subject=":page_data.files" key="file">
+        <l-col xs="12" sm="6" md="4" lg="2" style="text-align: center">
+          <t-icon size="h4" name="file-2" colour="body" text></t-icon>
+          <t-paragraph style="text-align: center">
+            <s:text use=":file.name" />
+          </t-paragraph>
+        </l-col>
+      </s:for>
+    </l-row>
+  </d-panel>
+
+  <d-panel colour="body">
+    <l-row>
+      <l-col xs="12">
+        <t-heading level="h4">Folders</t-heading>
+      </l-col>
+      <s:for subject=":page_data.folders" key="folder">
+        <l-col xs="12" sm="6" md="4" lg="2" style="text-align: center">
+          <t-icon size="h4" name="folder-2" colour="body" text></t-icon>
+          <t-paragraph style="text-align: center">
+            <s:text use=":folder.name" />
+          </t-paragraph>
+        </l-col>
+      </s:for>
+    </l-row>
+  </d-panel>
+</div>

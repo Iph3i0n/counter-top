@@ -1,0 +1,69 @@
+<s:meta name="os-desktop">
+  <attr name="connection" type="any"></attr>
+</s:meta>
+
+<script>
+  import key_handlers from "../utils/key_events.ts";
+
+  const session = await self.connection.Send("execute", "session");
+  let state = "open";
+  let running = [];
+
+  async function LaunchApp(event) {
+    const [id, name] = event.detail;
+    toggle_explorer();
+    if (running.includes(id)) return;
+    await self.connection.Send("execute", "load_app", id);
+    running.push([id, name]);
+  }
+
+  function CloseApp(id) {
+    return async () => {
+      running = running.filter((r) => r[0] !== id);
+    };
+  }
+
+  function toggle_explorer() {
+    state = state === "open" ? "closed" : "open";
+  }
+
+  document.addEventListener(
+    "keyup",
+    key_handlers({
+      F12: () => {
+        toggle_explorer();
+        self.should_render();
+      },
+    })
+  );
+
+  document.addEventListener("COUNTER_TOP_OPEN_WINDOW", (event) => {
+    console.log(event);
+  });
+</script>
+
+<style>
+  :host {
+    display: block;
+    height: 100vh;
+
+    background: ":`url(/os/public/wallpapers/${session.wallpaper})`";
+    background-size: cover;
+  }
+</style>
+
+<s:for subject=":running" key="[id, name]">
+  <os-appwindow
+    app_id=":id"
+    name=":name"
+    connection=":self.connection"
+    on:closed="CloseApp(id)"
+  ></os-appwindow>
+</s:for>
+
+<os-app-explorer
+  connection=":self.connection"
+  open=":state"
+  on:app_launched="LaunchApp"
+  on:explorer_closed="toggle_explorer"
+></os-app-explorer>
