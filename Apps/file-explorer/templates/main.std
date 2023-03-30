@@ -2,7 +2,6 @@
 
 <script>
   let page_data = await window.Invoke("open_folder");
-  console.log(page_data);
 
   let mode = "";
 
@@ -49,6 +48,10 @@
       else mode = name;
     };
   }
+
+  document.addEventListener("COUNTER_TOP_WINDOW_CLOSING", () => {
+    window.Invoke("close_app");
+  });
 </script>
 
 <style>

@@ -302,3 +302,7 @@ Server.CreateHandler(
     return blob;
   }
 );
+
+Server.CreateHandler("close_app", () => {
+  Server.Postback("close_app");
+});

@@ -13,7 +13,12 @@
   let title;
 
   function on_close() {
-    self.dispatchEvent(new CustomEvent("closed"));
+    iframe.current.contentWindow.document.dispatchEvent(
+      new CustomEvent("COUNTER_TOP_WINDOW_CLOSING")
+    );
+    setTimeout(() => {
+      self.dispatchEvent(new CustomEvent("closed"));
+    }, 50);
   }
 
   function on_corner_down(e) {
@@ -148,6 +153,9 @@
       <s:text use=":title || self.name" />
     </t-paragraph>
   </d-panel>
-  <iframe src=":`/apps/${self.app_id}/${self.location}`" s:ref="iframe"></iframe>
+  <iframe
+    src=":`/apps/${self.app_id}/${self.location}`"
+    s:ref="iframe"
+  ></iframe>
   <div class="corner" on:mousedown="on_corner_down"></div>
 </d-panel>
