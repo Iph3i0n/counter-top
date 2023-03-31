@@ -2,6 +2,7 @@
 
 <script>
   import SpawnSocket from "../../Interfacing/SocketSpawner.ts";
+  import OpenWindowEvent from "../utils/open_window_event.ts";
   const token_key = "counter_top_auth_token";
 
   let mode = "login";
@@ -50,11 +51,11 @@
           {},
           {
             open_window: (app, location, name) => {
-              document.dispatchEvent(
-                new CustomEvent("COUNTER_TOP_OPEN_WINDOW", {
-                  detail: { app, location, name },
-                })
-              );
+              return new Promise((res) => {
+                document.dispatchEvent(
+                  new OpenWindowEvent(app, location, name, res)
+                );
+              });
             },
           }
         )

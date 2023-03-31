@@ -24,6 +24,8 @@ type BasicContext<TLocal extends Schema, TGlobal extends Schema> = {
   readonly OsStore: Directory<typeof OsSchema>;
   readonly UserState: Directory<TLocal>;
   readonly GlobalState: Directory<TGlobal>;
+  OpenWindow(location: string, name: string): Promise<void>;
+  EndApp(): Promise<void>;
 };
 
 export default function CreateAppServer<
@@ -35,7 +37,7 @@ export default function CreateAppServer<
   global_schema: TGlobal,
   startup?: (ctx: BasicContext<TLocal, TGlobal>) => TContext | Promise<TContext>
 ) {
-  return CreateServer<TContext>(async (ctx) => {
+  const result = CreateServer<TContext>(async (ctx) => {
     Assert(IsAppStartup, ctx);
 
     const context = {
@@ -54,10 +56,20 @@ export default function CreateAppServer<
       get GlobalState() {
         return new Directory(global_schema, ctx.location.global_state);
       },
+
+      OpenWindow(location: string, name: string): Promise<void> {
+        return result.Postback("open_window", location, name);
+      },
+
+      EndApp(): Promise<void> {
+        return result.Postback("close_app");
+      },
     };
 
     const final_context = startup ? await startup(context) : context;
 
     return final_context as any;
   });
+
+  return result;
 }

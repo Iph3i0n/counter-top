@@ -29,7 +29,7 @@ const Server = CreateAppServer(
   },
   {},
   (c) => {
-    Server.Postback("open_window", "index.html", "File Explorer");
+    c.OpenWindow("index.html", "File Explorer").then(() => c.EndApp());
     return c;
   }
 );
@@ -302,7 +302,3 @@ Server.CreateHandler(
     return blob;
   }
 );
-
-Server.CreateHandler("close_app", () => {
-  Server.Postback("close_app");
-});

@@ -1,0 +1,109 @@
+<s:meta name="os-command-pallette">
+  <attr name="fullscreen" type="boolean"></attr>
+  <attr name="connection" type="any"></attr>
+</s:meta>
+
+<script>
+  let is_open = false;
+
+  function command(name) {
+    return () => {
+      self.dispatchEvent(new CustomEvent(name));
+    };
+  }
+
+  const actions = () => [
+    {
+      name: "enter_fullscreen",
+      icon: !!(
+        document.fullscreenElement ||
+        document.mozFullScreenElement ||
+        document.webkitFullscreenElement ||
+        document.msFullscreenElement
+      )
+        ? "fullscreen-exit"
+        : "fullscreen",
+    },
+    { name: "open_apps", icon: "apps" },
+  ];
+</script>
+
+<style>
+  :host {
+    display: block;
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+  }
+
+  .main-button {
+    border-radius: 4rem;
+    width: 2rem;
+    height: 2rem;
+    text-align: center;
+  }
+
+  .button-container {
+    position: relative;
+  }
+
+  .action-button {
+    border-radius: 2rem;
+    width: 1rem;
+    height: 1rem;
+    text-align: center;
+  }
+
+  .action-container {
+    position: absolute;
+    top: 0;
+    right: 0;
+    opacity: 0;
+
+    pointer-events: none;
+
+    transition: opacity 100ms, top 100ms, right 100ms;
+  }
+
+  @if is_open {
+    .action-container {
+      opacity: 1;
+
+      pointer-events: all;
+    }
+
+    .action-container:nth-child(1) {
+      top: -3rem;
+      right: 0;
+    }
+
+    .action-container:nth-child(2) {
+      top: -3rem;
+      right: 3rem;
+    }
+  }
+</style>
+
+<div class="button-container">
+  <s:for subject=":actions()" key="{ name, icon }">
+    <div class="action-container">
+      <f-button
+        type="button"
+        colour="surface"
+        class="action-button"
+        on:click="command(name)"
+      >
+        <t-icon name=":icon" colour="surface" text size="body"></t-icon>
+      </f-button>
+    </div>
+  </s:for>
+
+  <f-button
+    type="button"
+    colour="surface"
+    class="main-button"
+    on:click="() => is_open = !is_open"
+  >
+    <t-icon name="menu-5" colour="surface" text size="h4"></t-icon>
+  </f-button>
+</div>

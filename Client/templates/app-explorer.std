@@ -59,11 +59,18 @@
     right: 1rem;
     cursor: pointer;
   }
+
+  .close-button f-button {
+    border-radius: 4rem;
+    width: 2rem;
+    height: 2rem;
+    text-align: center;
+  }
 </style>
 
 <div class="close-button">
   <f-button colour="surface" on:click="close_explorer">
-    <t-icon name="close" colour="surface" text size="h1"></t-icon>
+    <t-icon name="close" colour="surface" text size="h4"></t-icon>
   </f-button>
 </div>
 

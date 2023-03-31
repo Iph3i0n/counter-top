@@ -14,5 +14,6 @@
   "files.associations": {
     "*.std": "html",
     "*.pss": "css"
-  }
+  },
+  "html.customData": ["./.vscode/bakery.html-data.json"]
 }
