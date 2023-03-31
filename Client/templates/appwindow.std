@@ -46,8 +46,8 @@
     const instance = iframe.current;
     instance.style.pointerEvents = "none";
     event.preventDefault();
-    let current_x = event.clientX;
-    let current_y = event.clientY;
+    const offset_x = event.clientX - self.offsetLeft;
+    const offset_y = event.clientY - self.offsetTop;
 
     window.onmouseup = () => {
       instance.style.pointerEvents = "all";
@@ -57,12 +57,10 @@
 
     window.onmousemove = (e) => {
       e.preventDefault();
-      const new_x = current_x - e.clientX;
-      const new_y = current_y - e.clientY;
-      current_x = e.clientX;
-      current_y = e.clientY;
-      bounds.top = self.offsetTop - new_y + "px";
-      bounds.left = self.offsetLeft - new_x + "px";
+      const new_x = e.clientX - offset_x;
+      const new_y = e.clientY - offset_y;
+      bounds.top = new_y + "px";
+      bounds.left = new_x + "px";
       self.style.top = bounds.top;
       self.style.left = bounds.left;
     };
