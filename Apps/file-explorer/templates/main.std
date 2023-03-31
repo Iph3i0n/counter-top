@@ -5,6 +5,30 @@
 
   let mode = "";
 
+  function toggle_mode(name) {
+    return () => {
+      if (mode === name) mode = "";
+      else mode = name;
+      self.should_render();
+    };
+  }
+
+  window.SetMenus([
+    {
+      name: "Folder",
+      items: [
+        { name: "Create Folder", onclick: toggle_mode("creating_folder") },
+        { name: "Upload Files", onclick: toggle_mode("creating_file") },
+        {
+          name: "Download Zip",
+          onclick: () => {
+            debugger;
+          },
+        },
+      ],
+    },
+  ]);
+
   function to_data_url(file) {
     return new Promise((res, rej) => {
       const reader = new FileReader();
@@ -40,13 +64,6 @@
 
     page_data = await window.Invoke("open_folder", page_data.id);
     mode = "";
-  }
-
-  function toggle_mode(name) {
-    return () => {
-      if (mode === name) mode = "";
-      else mode = name;
-    };
   }
 </script>
 
@@ -96,28 +113,6 @@
       </l-row>
     </f-form>
   </s:if>
-  <l-row>
-    <l-col xs="12">
-      <div class="button-groups">
-        <f-button type="button" on:click="toggle_mode('creating_folder')">
-          <t-icon
-            name="folder-add"
-            colour="primary"
-            text
-            size="body_large"
-          ></t-icon>
-        </f-button>
-        <f-button type="button" on:click="toggle_mode('creating_file')">
-          <t-icon
-            name="file-add"
-            colour="primary"
-            text
-            size="body_large"
-          ></t-icon>
-        </f-button>
-      </div>
-    </l-col>
-  </l-row>
 
   <d-panel colour="surface">
     <l-row>

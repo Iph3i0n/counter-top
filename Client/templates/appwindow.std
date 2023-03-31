@@ -6,11 +6,22 @@
 </s:meta>
 
 <script>
+  import c from "../utils/class_names.ts";
+
   const iframe = CreateRef();
   const corner = CreateRef();
   const bounds = { top: "30px", left: "20px", width: "400px", height: "300px" };
 
   let title;
+  let open_menu;
+  let menus = [];
+
+  function toggle_menu(item) {
+    return () => {
+      if (open_menu === item) open_menu = undefined;
+      else open_menu = item;
+    };
+  }
 
   function on_close() {
     iframe.current.contentWindow.document.dispatchEvent(
@@ -78,6 +89,11 @@
       );
     };
 
+    instance.contentWindow.SetMenus = function (structure) {
+      menus = structure;
+      self.should_render();
+    };
+
     instance.onload = () => {
       title = instance.contentDocument.title;
       self.should_render();
@@ -121,6 +137,7 @@
     background: #f00;
     cursor: pointer;
     box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.2);
+    margin: 0.5rem;
   }
 
   .main-panel {
@@ -133,20 +150,87 @@
 
   t-paragraph {
     text-align: center;
-    margin: 0;
+    margin: 0.5rem;
   }
 
   .title-panel {
     display: flex;
     align-items: center;
     justify-content: space-between;
+  }
+
+  .menus {
+    margin: 0 1rem;
+    flex: 1;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .menus t-paragraph {
+    text-align: left;
+    margin: 0;
+  }
+
+  .menu-item {
+    position: relative;
     padding: 0.5rem;
+    cursor: pointer;
+  }
+
+  .menu-item:hover {
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  .menu-item .menu-content {
+    opacity: 0;
+    position: absolute;
+    top: 110%;
+    left: 0;
+    pointer-events: none;
+    transition: opacity 100ms;
+  }
+
+  .menu-item.open .menu-content {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .menu-content .menu-button {
+    padding: 0.5rem;
+    white-space: nowrap;
+  }
+
+  .menu-content .menu-button:hover {
+    background: rgba(0, 0, 0, 0.1);
   }
 </style>
 
 <d-panel class="main-panel" colour="body" bordered>
   <d-panel class="title-panel" colour="surface">
     <div class="close-button" on:click="on_close"></div>
+    <div class="menus">
+      <s:for subject=":menus" key="menu_item">
+        <div
+          class=":c('menu-item', ['open', open_menu === menu_item])"
+          on:click="toggle_menu(menu_item)"
+        >
+          <t-paragraph>
+            <s:text use=":menu_item.name" />
+          </t-paragraph>
+          <div class="menu-content">
+            <d-panel colour="surface" bordered>
+              <s:for subject=":menu_item.items" key="item">
+                <t-paragraph class="menu-button" on:click="item.onclick">
+                  <s:text use=":item.name" />
+                </t-paragraph>
+              </s:for>
+            </d-panel>
+          </div>
+        </div>
+      </s:for>
+    </div>
     <t-paragraph>
       <s:text use=":title || self.name" />
     </t-paragraph>
