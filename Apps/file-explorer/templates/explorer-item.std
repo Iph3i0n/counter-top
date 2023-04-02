@@ -1,0 +1,112 @@
+<s:meta name="fs-explorer-item">
+  <attr name="name" type="any"></attr>
+  <attr name="icon" type="any"></attr>
+  <attr name="colour" type="any"></attr>
+  <attr name="actions" type="any"></attr>
+</s:meta>
+
+<script>
+  let menu_open = false;
+
+  function on_context(e) {
+    e.preventDefault();
+    menu_open = true;
+  }
+
+  function trigger(action) {
+    return (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      action();
+    };
+  }
+</script>
+
+<style>
+  .directory-item {
+    text-align: center;
+    width: 8rem;
+    height: 8rem;
+    margin: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    cursor: pointer;
+    border-radius: 1rem;
+    position: relative;
+  }
+
+  .directory-item:hover {
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  .context-menu {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 200ms;
+
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: 3rem auto auto;
+    text-align: center;
+  }
+
+  .context-menu t-paragraph {
+    grid-column: 1 / 3;
+  }
+
+  .action-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 200ms;
+  }
+
+  .action-button:hover {
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  @if menu_open {
+    .context-menu {
+      opacity: 1;
+      pointer-events: all;
+    }
+  }
+</style>
+
+<div
+  class="directory-item"
+  on:click="self.actions[0].action"
+  on:contextmenu="on_context"
+  on:mouseleave="() => menu_open = false"
+>
+  <t-icon size="h4" name=":self.icon" colour=":self.colour" text></t-icon>
+  <t-paragraph style="text-align: center">
+    <s:text use=":self.name" />
+  </t-paragraph>
+
+  <d-panel class="context-menu" colour=":self.colour" bordered>
+    <t-paragraph style="text-align: center; margin: 0.5rem 0">
+      <small>
+        <s:text use=":self.name" />
+      </small>
+    </t-paragraph>
+    <s:for subject=":self.actions" key="action">
+      <div class="action-button" on:click="trigger(action.action)">
+        <t-icon
+          name=":action.icon"
+          colour=":self.colour"
+          size="body_large"
+          text
+        ></t-icon>
+      </div>
+    </s:for>
+  </d-panel>
+</div>
