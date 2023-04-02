@@ -8,11 +8,6 @@
 <script>
   let menu_open = false;
 
-  function on_context(e) {
-    e.preventDefault();
-    menu_open = true;
-  }
-
   function trigger(action) {
     return (e) => {
       e.preventDefault();
@@ -73,18 +68,15 @@
     background: rgba(0, 0, 0, 0.1);
   }
 
-  @if menu_open {
-    .context-menu {
-      opacity: 1;
-      pointer-events: all;
-    }
+  :host(:hover) .context-menu {
+    opacity: 1;
+    pointer-events: all;
   }
 </style>
 
 <div
   class="directory-item"
   on:click="self.actions[0].action"
-  on:contextmenu="on_context"
   on:mouseleave="() => menu_open = false"
 >
   <t-icon size="h4" name=":self.icon" colour=":self.colour" text></t-icon>
