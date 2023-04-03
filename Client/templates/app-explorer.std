@@ -66,6 +66,10 @@
     height: 2rem;
     text-align: center;
   }
+
+  f-button {
+    margin: 1rem;
+  }
 </style>
 
 <div class="close-button">
@@ -76,11 +80,13 @@
 
 <div class="content">
   <s:for subject=":apps" key="[id, name]">
-    <f-button colour="surface" on:click="LaunchApp([id, name])">
-      <img src=":`/apps/${id}/public/icon.svg`" />
-      <t-paragraph>
-        <s:text use=":name" />
-      </t-paragraph>
-    </f-button>
+    <div>
+      <f-button colour="surface" on:click="LaunchApp([id, name])">
+        <img src=":`/apps/${id}/public/icon.svg`" />
+        <t-paragraph>
+          <s:text use=":name" />
+        </t-paragraph>
+      </f-button>
+    </div>
   </s:for>
 </div>
