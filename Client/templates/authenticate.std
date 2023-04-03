@@ -50,10 +50,10 @@
           url,
           {},
           {
-            open_window: (app, location, name) => {
+            open_window: (app, location, name, bounds) => {
               return new Promise((res) => {
                 document.dispatchEvent(
-                  new OpenWindowEvent(app, location, name, res)
+                  new OpenWindowEvent(app, location, name, res, bounds)
                 );
               });
             },

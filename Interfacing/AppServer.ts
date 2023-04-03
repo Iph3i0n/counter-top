@@ -20,11 +20,13 @@ const IsAppStartup = IsObject({
   args: Optional(DoNotCare),
 });
 
+type Bounds = { top: string; left: string; width: string; height: string };
+
 type BasicContext<TLocal extends Schema, TGlobal extends Schema> = {
   readonly OsStore: Directory<typeof OsSchema>;
   readonly UserState: Directory<TLocal>;
   readonly GlobalState: Directory<TGlobal>;
-  OpenWindow(location: string, name: string): Promise<void>;
+  OpenWindow(location: string, name: string, bounds?: Bounds): Promise<void>;
   EndApp(): Promise<void>;
 };
 
@@ -57,8 +59,12 @@ export default function CreateAppServer<
         return new Directory(global_schema, ctx.location.global_state);
       },
 
-      OpenWindow(location: string, name: string): Promise<void> {
-        return result.Postback("open_window", location, name);
+      OpenWindow(
+        location: string,
+        name: string,
+        bounds?: Bounds
+      ): Promise<void> {
+        return result.Postback("open_window", location, name, bounds);
       },
 
       EndApp(): Promise<void> {

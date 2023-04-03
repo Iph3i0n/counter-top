@@ -3,6 +3,7 @@
   <attr name="name" type="string"></attr>
   <attr name="location" type="string"></attr>
   <attr name="connection" type="any"></attr>
+  <attr name="bounds" type="any"></attr>
 </s:meta>
 
 <script>
@@ -10,7 +11,12 @@
 
   const iframe = CreateRef();
   const corner = CreateRef();
-  const bounds = { top: "30px", left: "20px", width: "400px", height: "300px" };
+  const bounds = self.bounds || {
+    top: "30px",
+    left: "20px",
+    width: "400px",
+    height: "300px",
+  };
 
   let title;
   let open_menu;

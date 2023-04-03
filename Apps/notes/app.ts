@@ -12,7 +12,12 @@ const Server = CreateAppServer(
   },
   {},
   (c) => {
-    c.OpenWindow("index.html", "Notes").then(() => c.EndApp());
+    c.OpenWindow("index.html", "Notes", {
+      top: "50px",
+      left: "50px",
+      width: "800px",
+      height: "600px",
+    }).then(() => c.EndApp());
     return c;
   }
 );
