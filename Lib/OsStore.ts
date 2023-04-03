@@ -27,6 +27,14 @@ if (initialise)
         admin: false,
         system: true,
       },
+      "notes": {
+        version: "v1",
+        name: "Notes",
+        entry_point: Path.resolve(DefaultAppsDir, "notes", "app.ts"),
+        ui_dir: Path.resolve(DefaultAppsDir, "notes"),
+        admin: false,
+        system: true,
+      },
     },
   });
 
