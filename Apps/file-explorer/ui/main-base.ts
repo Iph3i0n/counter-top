@@ -2,8 +2,8 @@ import { ComponentBase, CreateRef } from "../../../deps/wholemeal.ts";
 
 type ChildFolder = {
   name: string;
-  created: Date;
-  modified: Date;
+  created: string;
+  modified: string;
   folders: Array<string>;
   parent: string;
   id: string;
@@ -11,8 +11,8 @@ type ChildFolder = {
 
 type AppFile = {
   name: string;
-  created: Date;
-  modified: Date;
+  created: string;
+  modified: string;
   blob: string;
   parent: string;
   id: string;
@@ -20,8 +20,8 @@ type AppFile = {
 
 type Folder = {
   name: string;
-  created: Date;
-  modified: Date;
+  created: string;
+  modified: string;
   folders: Array<ChildFolder>;
   files: Array<AppFile>;
   parent: string;
@@ -36,6 +36,8 @@ declare global {
 export default abstract class Main extends ComponentBase {
   current_folder: Folder = undefined as any;
   breadcrumbs: Array<Folder> = [];
+
+  info_item: AppFile | Folder | undefined = undefined;
 
   confirm_dialogue: { res: () => void; rej: () => void } | undefined =
     undefined;
@@ -66,8 +68,27 @@ export default abstract class Main extends ComponentBase {
 
   async confirm() {
     await new Promise<void>((res, rej) => {
-      this.confirm_dialogue = { res, rej };
+      this.confirm_dialogue = {
+        res: () => {
+          this.confirm_dialogue = undefined;
+          this.should_render();
+          res();
+        },
+        rej: () => {
+          this.confirm_dialogue = undefined;
+          this.should_render();
+          rej();
+        },
+      };
       this.refresh();
+    });
+  }
+
+  format(date: string) {
+    const final = new Date(date);
+    return final.toLocaleString(undefined, {
+      dateStyle: "full",
+      timeStyle: "long",
     });
   }
 
@@ -114,12 +135,6 @@ export default abstract class Main extends ComponentBase {
               await this.refresh();
             },
           },
-          {
-            name: "Download Zip",
-            onclick: () => {
-              debugger;
-            },
-          },
         ],
       },
     ]);
@@ -149,7 +164,10 @@ export default abstract class Main extends ComponentBase {
       },
       {
         icon: "file-info",
-        action: async () => {},
+        action: () => {
+          this.info_item = file;
+          this.should_render();
+        },
       },
       {
         icon: "delete-bin",
@@ -183,7 +201,10 @@ export default abstract class Main extends ComponentBase {
       },
       {
         icon: "folder-info",
-        action: async () => {},
+        action: () => {
+          this.info_item = folder;
+          this.should_render();
+        },
       },
       {
         icon: "delete-bin",

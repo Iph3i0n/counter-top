@@ -135,3 +135,25 @@
     </div>
   </o-modal>
 </s:if>
+
+<s:if check=":!!self.info_item">
+  <o-modal
+    open
+    size="medium"
+    on:CloseRequested="() => self.info_item = undefined"
+  >
+    <span slot="title">
+      <s:text use=":self.info_item.name" />
+    </span>
+    <t-paragraph>
+      Created:
+      <br />
+      <s:text use=":self.format(self.info_item.created)" />
+    </t-paragraph>
+    <t-paragraph>
+      Modified:
+      <br />
+      <s:text use=":self.format(self.info_item.modified)" />
+    </t-paragraph>
+  </o-modal>
+</s:if>
