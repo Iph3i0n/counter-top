@@ -77,6 +77,8 @@
 
     background: ":`url(/os/public/wallpapers/${session.wallpaper})`";
     background-size: cover;
+
+    overflow: hidden;
   }
 </style>
 

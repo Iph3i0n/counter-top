@@ -1,3 +1,133 @@
 <s:meta name="notes-main"> </s:meta>
 
-<div>Hello world</div>
+<script>
+  let data = await Invoke("notes_list");
+  let open_note;
+  let note_text = "";
+
+  async function refresh() {
+    data = await Invoke("notes_list");
+  }
+
+  function select_note(note) {
+    return async () => {
+      open_note = note;
+      note_text = await Invoke("note_text", note.id);
+      // setTimeout(async () => {
+      //   open_note = note;
+      //   note_text = await Invoke("note_text", note.id);
+      //   self.should_render();
+      // }, 10);
+    };
+  }
+
+  function debounce(handler, delay) {
+    let timeout;
+
+    return (...args) => {
+      if (timeout) clearTimeout(timeout);
+
+      timeout = setTimeout(() => handler(...args), delay);
+    };
+  }
+
+  function set_name(note) {
+    return debounce(async (e) => {
+      await Invoke("update_note", note.id, e.Value, note_text);
+    }, 200);
+  }
+
+  function set_text(note) {
+    return debounce(async (e) => {
+      await Invoke("update_note", note.id, note.name, e.Value);
+    }, 200);
+  }
+
+  function delete_note(note) {
+    return async () => {
+      if (!confirm("Are you sure? This action cannot be undone.")) return;
+
+      await Invoke("delete_note", note.id);
+      await refresh();
+    };
+  }
+</script>
+
+<style>
+  :host {
+    display: grid;
+    grid-template-columns: 16rem auto;
+    height: 100vh;
+  }
+
+  .note-button {
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    transition: background-color 200ms;
+    position: relative;
+  }
+
+  .note-button:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+
+  .note-creator {
+    padding: 0.5rem;
+  }
+
+  .note-content {
+    max-height: 100%;
+    overflow-y: auto;
+  }
+
+  .delete-button {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+  }
+</style>
+
+<d-panel colour="surface" style="height: 100%">
+  <s:for subject=":data" key="note">
+    <div class="note-button" on:click="select_note(note)">
+      <div class="delete-button" on:click="delete_note(note)">
+        <t-icon name="delete-bin" colour="surface" text></t-icon>
+      </div>
+      <t-paragraph>
+        <s:text use=":note.name" />
+        <br />
+        <small>
+          <s:text use=":new Date(note.modified).toLocaleDateString()" />
+        </small>
+      </t-paragraph>
+    </div>
+  </s:for>
+  <div class="note-creator">
+    <notes-creator on:note_created="refresh"></notes-creator>
+  </div>
+</d-panel>
+
+<s:if check=":open_note">
+  <div class="note-content">
+    <l-row>
+      <l-col xs="12">
+        <f-input
+          type="text"
+          prefill=":open_note.name"
+          on:ValueChanged="set_name(open_note)"
+        >
+          Name
+        </f-input>
+      </l-col>
+      <l-col xs="12">
+        <f-richtext
+          type="text"
+          prefill=":note_text ?? ' '"
+          on:ValueChanged="set_text(open_note)"
+        >
+          Note
+        </f-richtext>
+      </l-col>
+    </l-row>
+  </div>
+</s:if>

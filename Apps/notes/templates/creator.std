@@ -1,0 +1,36 @@
+<s:meta name="notes-creator"></s:meta>
+
+<script>
+  let open = false;
+
+  async function on_create(e) {
+    const data = e.FormData;
+    await Invoke("create_note", data.name);
+
+    self.dispatchEvent(new CustomEvent("note_created"));
+    open = false;
+  }
+</script>
+
+<div>
+  <f-button type="button" on:click="() => open = true"> Create Note </f-button>
+</div>
+
+<s:if check=":open">
+  <f-form submit="event-only" on:Submitted="on_create">
+    <o-modal size="medium" open on:CloseRequested="() => open = false">
+      <span slot="title"> Create Note </span>
+      <l-row>
+        <l-col xs="12">
+          <f-input name="name" type="text">Name</f-input>
+        </l-col>
+      </l-row>
+      <div slot="footer">
+        <f-button type="submit" colour="primary"> Create </f-button>
+        <f-button type="button" colour="warning" on:click="() => open = false">
+          Cancel
+        </f-button>
+      </div>
+    </o-modal>
+  </f-form>
+</s:if>

@@ -4,10 +4,11 @@
   let connection;
 
   $after: {
-    connection.OnClose(() => {
-      connection = undefined;
-      self.should_render();
-    });
+    if (connection)
+      connection.OnClose(() => {
+        connection = undefined;
+        self.should_render();
+      });
   }
 </script>
 
