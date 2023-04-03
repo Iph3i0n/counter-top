@@ -1,0 +1,6 @@
+{
+  "tasks": {
+    "build": "wholemeal build",
+    "dev": "wholemeal dev"
+  }
+}

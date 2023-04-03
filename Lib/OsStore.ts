@@ -19,11 +19,11 @@ for (const _ of result.Model.apps) {
 if (initialise)
   result.Write({
     apps: {
-      "file-explorer": {
+      "files": {
         version: "v1",
         name: "File Explorer",
-        entry_point: Path.resolve(DefaultAppsDir, "file-explorer", "app.ts"),
-        ui_dir: Path.resolve(DefaultAppsDir, "file-explorer"),
+        entry_point: Path.resolve(DefaultAppsDir, "files", "app.ts"),
+        ui_dir: Path.resolve(DefaultAppsDir, "files"),
         admin: false,
         system: true,
       },
