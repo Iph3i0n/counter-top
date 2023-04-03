@@ -23,6 +23,7 @@ export default async function SpawnSocket(
   return await new Promise<{
     Send(command: string, ...args: any): Promise<any>;
     Close(): void;
+    OnClose(handler: () => void): void;
   }>((res, rej) => {
     const respond = (data: Response) => socket.send(JSON.stringify(data));
 
@@ -104,6 +105,9 @@ export default async function SpawnSocket(
         },
         Close() {
           socket.close();
+        },
+        OnClose(handler) {
+          socket.onclose = handler;
         },
       });
     }, 100);

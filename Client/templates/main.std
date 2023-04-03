@@ -2,6 +2,13 @@
 
 <script>
   let connection;
+
+  $after: {
+    connection.OnClose(() => {
+      connection = undefined;
+      self.should_render();
+    });
+  }
 </script>
 
 <s:if check=":!connection">
