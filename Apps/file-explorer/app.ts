@@ -172,7 +172,24 @@ Server.CreateHandler(
 
       new Promise<void>((res) => {
         for (const folder of existing.folders) internal(folder);
-        for (const file of existing.files) internal(file);
+        for (const file of existing.files) {
+          const existing = UserState.Model.files[file];
+          const parent = UserState.Model.folders[existing.parent];
+          UserState.Write({
+            files: { [file]: undefined },
+            blobs: { [existing.blob]: undefined },
+            folders: {
+              ...(parent
+                ? {
+                    [existing.parent]: {
+                      ...parent,
+                      files: parent.files.filter((f) => f !== id),
+                    },
+                  }
+                : {}),
+            },
+          });
+        }
         res();
       });
     };

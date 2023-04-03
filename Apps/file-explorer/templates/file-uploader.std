@@ -1,0 +1,65 @@
+<s:meta name="fs-file-uploader"></s:meta>
+
+<script>
+  let is_open = false;
+  let current_resolver = () => {};
+  let on_close = () => {};
+
+  function to_data_url(file) {
+    return new Promise((res) => {
+      const reader = new FileReader();
+      reader.addEventListener("load", () => res(reader.result));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function create_file(e) {
+    const form = e.FormData;
+    const result = [];
+    for (const file of form.file_data)
+      result.push({ name: file.name, data: await to_data_url(file) });
+
+    current_resolver(result);
+  }
+
+  self.get_files = () => {
+    return new Promise((res, rej) => {
+      is_open = true;
+
+      current_resolver = (files) => {
+        is_open = false;
+        res(files);
+        self.should_render();
+      };
+
+      on_close = () => {
+        is_open = false;
+        rej("Closed by user");
+        self.should_render();
+      };
+
+      self.should_render();
+    });
+  };
+
+  function on_submit(e) {
+    const data = e.FormData;
+    current_resolver(data.name);
+  }
+</script>
+
+<s:if check=":is_open">
+  <f-form submit="event-only" on:Submitted="create_file">
+    <l-row>
+      <l-col xs="12">
+        <f-file name="file_data" multiple>Upload the file</f-file>
+      </l-col>
+      <l-col xs="12">
+        <f-button type="submit" colour="contrast"> Upload </f-button>
+        <f-button type="button" colour="body" on:click="on_close">
+          Cancel
+        </f-button>
+      </l-col>
+    </l-row>
+  </f-form>
+</s:if>

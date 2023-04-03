@@ -21,12 +21,6 @@
     width: 100%;
   }
 
-  .upload-button {
-    width: 100%;
-    box-sizing: border-box;
-    text-align: center;
-  }
-
   .directory-section {
     display: flex;
     align-items: center;
@@ -66,6 +60,8 @@
       </div>
     </s:for>
   </div>
+  <fs-name-picker s:ref="self.name_picker_ref"></fs-name-picker>
+  <fs-file-uploader s:ref="self.file_uploader_ref"></fs-file-uploader>
   <s:if check=":self.mode === 'creating_folder'">
     <f-form submit="event-only" on:Submitted="(e) => self.create_folder(e)">
       <l-row>
@@ -112,3 +108,30 @@
     </s:for>
   </d-panel>
 </div>
+
+<s:if check=":!!self.confirm_dialogue">
+  <o-modal
+    open
+    size="medium"
+    on:CloseRequested="() => self.confirm_dialogue = undefined"
+  >
+    <span slot="title">Are you sure?</span>
+    <t-paragraph>This action cannot be undone.</t-paragraph>
+    <div slot="footer">
+      <f-button
+        type="button"
+        colour="primary"
+        on:click="self.confirm_dialogue?.res"
+      >
+        Accept
+      </f-button>
+      <f-button
+        type="button"
+        colour="warning"
+        on:click="self.confirm_dialogue?.rej"
+      >
+        Reject
+      </f-button>
+    </div>
+  </o-modal>
+</s:if>

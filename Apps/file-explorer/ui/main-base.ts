@@ -1,4 +1,4 @@
-import { ComponentBase } from "../../../deps/wholemeal.ts";
+import { ComponentBase, CreateRef } from "../../../deps/wholemeal.ts";
 
 type ChildFolder = {
   name: string;
@@ -33,19 +33,50 @@ declare global {
   function SetMenus(menus: Array<any>): void;
 }
 
-type Mode = "" | "creating_folder" | "creating_file";
-
 export default abstract class Main extends ComponentBase {
   current_folder: Folder = undefined as any;
   breadcrumbs: Array<Folder> = [];
-  mode: Mode = "";
 
-  #toggle_mode(name: Mode) {
-    return () => {
-      if (this.mode === name) this.mode = "";
-      else this.mode = name;
-      this.should_render();
-    };
+  confirm_dialogue: { res: () => void; rej: () => void } | undefined =
+    undefined;
+
+  name_picker_ref = CreateRef<
+    HTMLElement & {
+      get_name: (start: string) => Promise<string>;
+    }
+  >();
+
+  file_uploader_ref = CreateRef<
+    HTMLElement & {
+      get_files: () => Promise<Array<{ name: string; data: string }>>;
+    }
+  >();
+
+  get name_picker() {
+    const instance = this.name_picker_ref.current;
+    if (!instance) throw new Error("Ref not set");
+    return instance;
+  }
+
+  get file_uploader() {
+    const instance = this.file_uploader_ref.current;
+    if (!instance) throw new Error("Ref not set");
+    return instance;
+  }
+
+  async confirm() {
+    await new Promise<void>((res, rej) => {
+      this.confirm_dialogue = { res, rej };
+      this.refresh();
+    });
+  }
+
+  async refresh() {
+    this.current_folder = await window.Invoke(
+      "open_folder",
+      this.current_folder.id
+    );
+    this.should_render();
   }
 
   async StartUp() {
@@ -58,9 +89,31 @@ export default abstract class Main extends ComponentBase {
         items: [
           {
             name: "Create Folder",
-            onclick: this.#toggle_mode("creating_folder"),
+            onclick: async () => {
+              const name = await this.name_picker.get_name("");
+              await window.Invoke(
+                "create_folder",
+                name,
+                this.current_folder.id
+              );
+              await this.refresh();
+            },
           },
-          { name: "Upload Files", onclick: this.#toggle_mode("creating_file") },
+          {
+            name: "Upload Files",
+            onclick: async () => {
+              const files = await this.file_uploader.get_files();
+              for (const file of files)
+                await window.Invoke(
+                  "upload_file",
+                  file.name,
+                  this.current_folder.id,
+                  file.data
+                );
+
+              await this.refresh();
+            },
+          },
           {
             name: "Download Zip",
             onclick: () => {
@@ -88,15 +141,24 @@ export default abstract class Main extends ComponentBase {
       },
       {
         icon: "edit",
-        actions: async () => {},
+        action: async () => {
+          const new_name = await this.name_picker.get_name(file.name);
+          await Invoke("rename_file", file.id, new_name);
+          await this.refresh();
+        },
       },
       {
         icon: "file-info",
-        actions: async () => {},
+        action: async () => {},
       },
       {
         icon: "delete-bin",
-        actions: async () => {},
+        action: async () => {
+          await this.confirm();
+
+          await Invoke("delete_file", file.id);
+          await this.refresh();
+        },
       },
     ];
   }
@@ -108,21 +170,29 @@ export default abstract class Main extends ComponentBase {
         action: async () => {
           this.current_folder = await window.Invoke("open_folder", folder.id);
           this.breadcrumbs.push(this.current_folder);
-          this.mode = "";
           this.should_render();
         },
       },
       {
         icon: "edit",
-        actions: async () => {},
+        action: async () => {
+          const new_name = await this.name_picker.get_name(folder.name);
+          await Invoke("rename_folder", folder.id, new_name);
+          await this.refresh();
+        },
       },
       {
-        icon: "file-info",
-        actions: async () => {},
+        icon: "folder-info",
+        action: async () => {},
       },
       {
         icon: "delete-bin",
-        actions: async () => {},
+        action: async () => {
+          await this.confirm();
+
+          await Invoke("delete_folder", folder.id);
+          await this.refresh();
+        },
       },
     ];
   }
@@ -137,46 +207,6 @@ export default abstract class Main extends ComponentBase {
 
       this.current_folder = await window.Invoke("open_folder", folder.id);
       this.breadcrumbs = new_crumbs;
-      this.mode = "";
     };
-  }
-
-  #to_data_url(file: File) {
-    return new Promise((res) => {
-      const reader = new FileReader();
-      reader.addEventListener("load", () => {
-        res(reader.result);
-      });
-      reader.readAsDataURL(file);
-    });
-  }
-
-  async create_folder(e: any) {
-    const form = e.FormData;
-
-    await window.Invoke("create_folder", form.name, this.current_folder.id);
-
-    this.current_folder = await window.Invoke(
-      "open_folder",
-      this.current_folder.id
-    );
-    this.mode = "";
-  }
-
-  async create_file(e: any) {
-    const form = e.FormData;
-    for (const file of form.file_data)
-      await window.Invoke(
-        "upload_file",
-        file.name,
-        this.current_folder.id,
-        await this.#to_data_url(file)
-      );
-
-    this.current_folder = await window.Invoke(
-      "open_folder",
-      this.current_folder.id
-    );
-    this.mode = "";
   }
 }

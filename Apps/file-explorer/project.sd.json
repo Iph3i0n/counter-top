@@ -1,5 +1,10 @@
 {
-  "templates": ["./templates/main.std", "./templates/explorer-item.std"],
+  "templates": [
+    "./templates/main.std",
+    "./templates/explorer-item.std",
+    "./templates/name-picker.std",
+    "./templates/file-uploader.std"
+  ],
   "description": "The main client for the OS",
   "global_css": "./global.pss",
   "docs": {

@@ -1,0 +1,53 @@
+<s:meta name="fs-name-picker"></s:meta>
+
+<script>
+  let is_open = false;
+  let default_name = "";
+  let current_resolver = () => {};
+  let on_close = () => {};
+
+  self.get_name = (start) => {
+    return new Promise((res, rej) => {
+      is_open = true;
+      default_name = start;
+
+      current_resolver = (name) => {
+        default_name = "";
+        is_open = false;
+        res(name);
+        self.should_render();
+      };
+
+      on_close = () => {
+        default_name = "";
+        is_open = false;
+        rej("Closed by user");
+        self.should_render();
+      };
+
+      self.should_render();
+    });
+  };
+
+  function on_submit(e) {
+    const data = e.FormData;
+    current_resolver(data.name);
+  }
+
+  $on_keypress: {
+    if (event.key !== "Escape") return;
+    event.preventDefault();
+
+    on_close();
+  }
+</script>
+
+<s:if check=":is_open">
+  <f-form submit="event-only" on:Submitted="on_submit">
+    <l-row>
+      <l-col xs="12">
+        <f-input name="name" type="text" prefill=":default_name">Name</f-input>
+      </l-col>
+    </l-row>
+  </f-form>
+</s:if>
