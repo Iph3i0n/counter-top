@@ -12,7 +12,6 @@ if (CanRegister)
         IsObject({
           email: IsString,
           password: IsString,
-          wallpaper: IsString,
         })
       )
     )
@@ -29,7 +28,7 @@ if (CanRegister)
               email: c.body.email,
               password: await BCrypt.hash(c.body.password),
               is_admin: false,
-              wallpaper: c.body.wallpaper,
+              wallpaper: "open-photo.jpeg",
             },
           },
         },

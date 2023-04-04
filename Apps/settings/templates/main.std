@@ -1,0 +1,13 @@
+<s:meta name="settings-main"> </s:meta>
+
+<script>
+  console.log("Hello world");
+</script>
+
+<style>
+  div {
+    color: red;
+  }
+</style>
+
+<div>Hello world</div>

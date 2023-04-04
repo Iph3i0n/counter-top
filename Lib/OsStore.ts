@@ -35,6 +35,14 @@ if (initialise)
         admin: false,
         system: true,
       },
+      "settings": {
+        version: "v1",
+        name: "Settings",
+        entry_point: Path.resolve(DefaultAppsDir, "settings", "app.ts"),
+        ui_dir: Path.resolve(DefaultAppsDir, "settings"),
+        admin: true,
+        system: true,
+      },
     },
   });
 

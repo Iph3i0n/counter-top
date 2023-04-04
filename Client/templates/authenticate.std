@@ -71,7 +71,6 @@
       body: JSON.stringify({
         email: data.email,
         password: data.password,
-        wallpaper: data.wallpaper,
       }),
       headers: {
         "content-type": "application/json",
@@ -165,12 +164,6 @@
       </l-col>
       <l-col xs="12">
         <f-input type="text" name="password" sensitive>Password</f-input>
-      </l-col>
-      <l-col xs="12">
-        <f-singleselect name="wallpaper">
-          <span slot="label">Wallpaper</span>
-          <option value="open-photo.jpeg">Coffee Shop</option>
-        </f-singleselect>
       </l-col>
       <l-col xs="12">
         <f-button type="submit">Register</f-button>
