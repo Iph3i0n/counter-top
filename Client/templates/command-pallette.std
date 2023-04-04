@@ -25,6 +25,7 @@
         : "fullscreen",
     },
     { name: "open_apps", icon: "apps" },
+    { name: "logout", icon: "logout-box" },
   ];
 </script>
 
@@ -80,6 +81,11 @@
     .action-container:nth-child(2) {
       top: -3rem;
       right: 3rem;
+    }
+
+    .action-container:nth-child(3) {
+      top: -3rem;
+      right: 6rem;
     }
   }
 </style>

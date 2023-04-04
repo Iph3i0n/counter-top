@@ -13,11 +13,6 @@
     return async () => {
       open_note = note;
       note_text = await Invoke("note_text", note.id);
-      // setTimeout(async () => {
-      //   open_note = note;
-      //   note_text = await Invoke("note_text", note.id);
-      //   self.should_render();
-      // }, 10);
     };
   }
 

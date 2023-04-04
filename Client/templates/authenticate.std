@@ -1,67 +1,15 @@
 <s:meta name="os-authenticate"></s:meta>
 
 <script>
+  import { StartConnection, TryStartConnection } from "../utils/cookie.ts";
   import SpawnSocket from "../../Interfacing/SocketSpawner.ts";
   import OpenWindowEvent from "../utils/open_window_event.ts";
-  const token_key = "counter_top_auth_token";
 
   let mode = "login";
 
-  function SetCookie(name, value, days) {
-    var expires = "";
-    if (days) {
-      var date = new Date();
-      date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
-      expires = "; expires=" + date.toUTCString();
-    }
-    document.cookie = name + "=" + (value || "") + expires + "; path=/";
-  }
-
-  function GetCookie(name) {
-    var nameEQ = name + "=";
-    var ca = document.cookie.split(";");
-    for (var i = 0; i < ca.length; i++) {
-      var c = ca[i];
-      while (c.charAt(0) == " ") c = c.substring(1, c.length);
-      if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
-    }
-    return null;
-  }
-
-  const existing = GetCookie(token_key);
+  const existing = await TryStartConnection();
   if (existing)
-    start_connection(existing)
-      .then((c) =>
-        self.dispatchEvent(new CustomEvent("authenticated", { detail: c }))
-      )
-      .catch((err) => console.log("Failed to start connection"));
-
-  function start_connection(token) {
-    return new Promise(async (res, rej) => {
-      SetCookie(token_key, token, 7);
-      const is_https = location.protocol === "https:";
-      const protocol = is_https ? "wss:" : "ws:";
-      const url = `${protocol}//${
-        location.host
-      }/os/session?token=${encodeURIComponent(token)}`;
-
-      res(
-        await SpawnSocket(
-          url,
-          {},
-          {
-            open_window: (app, location, name, bounds) => {
-              return new Promise((res) => {
-                document.dispatchEvent(
-                  new OpenWindowEvent(app, location, name, res, bounds)
-                );
-              });
-            },
-          }
-        )
-      );
-    });
-  }
+    self.dispatchEvent(new CustomEvent("authenticated", { detail: existing }));
 
   function on_submit_register(e) {
     const data = e.FormData;
@@ -77,7 +25,7 @@
       },
     })
       .then((r) => r.json())
-      .then((j) => start_connection(j.token))
+      .then((j) => StartConnection(j.token))
       .then((c) =>
         self.dispatchEvent(new CustomEvent("authenticated", { detail: c }))
       )
@@ -93,7 +41,7 @@
       )}&password=${encodeURIComponent(data.password)}`
     )
       .then((r) => r.json())
-      .then((j) => start_connection(j.token))
+      .then((j) => StartConnection(j.token))
       .then((c) =>
         self.dispatchEvent(new CustomEvent("authenticated", { detail: c }))
       )

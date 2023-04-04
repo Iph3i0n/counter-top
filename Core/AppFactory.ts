@@ -17,7 +17,7 @@ const RunningApps: Record<string, SpawnedWorker> = {};
 
 Server.CreateHandler(
   "load_app",
-  ({ loc }, app_id: string, ...args: Array<unknown>) => {
+  ({ loc, user_id }, app_id: string, ...args: Array<unknown>) => {
     const location = loc.App(app_id);
     const privileges = [location.global_state, location.user_state];
     if (location.system_state) privileges.push(location.system_state);
@@ -36,6 +36,7 @@ Server.CreateHandler(
       {
         location,
         args,
+        user_id,
       },
       {
         execute: async (
@@ -90,5 +91,10 @@ Server.CreateHandler("close_app", async (_, app_id: string) => {
 });
 
 Server.CreateHandler("session", ({ user_id }) => {
-  return Store.Model.users[user_id];
+  const existing = Store.Model.users[user_id];
+  return {
+    email: existing.email,
+    is_admin: existing.is_admin,
+    wallpaper: existing.wallpaper,
+  };
 });

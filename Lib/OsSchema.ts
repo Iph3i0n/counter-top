@@ -24,7 +24,7 @@ export default {
       email: new UTF8(),
       password: new ASCII(),
       is_admin: new Bool(),
-      wallpaper: new UTF8(),
+      wallpaper: new ASCII(),
     })
   ),
 };

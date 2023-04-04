@@ -17,6 +17,7 @@ const IsAppStartup = IsObject({
     user_state: IsString,
     system_state: Optional(IsString),
   }),
+  user_id: IsString,
   args: Optional(DoNotCare),
 });
 
@@ -28,6 +29,7 @@ type BasicContext<TLocal extends Schema, TGlobal extends Schema> = {
   readonly GlobalState: Directory<TGlobal>;
   OpenWindow(location: string, name: string, bounds?: Bounds): Promise<void>;
   EndApp(): Promise<void>;
+  readonly UserId: string;
 };
 
 export default function CreateAppServer<
@@ -69,6 +71,10 @@ export default function CreateAppServer<
 
       EndApp(): Promise<void> {
         return result.Postback("close_app");
+      },
+
+      get UserId() {
+        return ctx.user_id;
       },
     };
 

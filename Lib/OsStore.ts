@@ -19,7 +19,7 @@ for (const _ of result.Model.apps) {
 if (initialise)
   result.Write({
     apps: {
-      "files": {
+      files: {
         version: "v1",
         name: "File Explorer",
         entry_point: Path.resolve(DefaultAppsDir, "files", "app.ts"),
@@ -27,7 +27,7 @@ if (initialise)
         admin: false,
         system: true,
       },
-      "notes": {
+      notes: {
         version: "v1",
         name: "Notes",
         entry_point: Path.resolve(DefaultAppsDir, "notes", "app.ts"),
@@ -35,7 +35,7 @@ if (initialise)
         admin: false,
         system: true,
       },
-      "settings": {
+      settings: {
         version: "v1",
         name: "Settings",
         entry_point: Path.resolve(DefaultAppsDir, "settings", "app.ts"),
@@ -44,23 +44,20 @@ if (initialise)
         system: true,
       },
     },
+    users:
+      AdminUsers?.reduce(
+        (c, n, i) => ({
+          ...c,
+          [`ADMIN_USER_${i}`]: {
+            version: "v1",
+            email: n.email,
+            password: BCrypt.hashSync(n.password),
+            is_admin: true,
+            wallpaper: "open-photo.jpeg",
+          },
+        }),
+        {} as any
+      ) ?? {},
   });
-
-result.Write({
-  users:
-    AdminUsers?.reduce(
-      (c, n, i) => ({
-        ...c,
-        [`ADMIN_USER_${i}`]: {
-          version: "v1",
-          email: n.email,
-          password: BCrypt.hashSync(n.password),
-          is_admin: true,
-          wallpaper: "open-photo.jpeg",
-        },
-      }),
-      {} as any
-    ) ?? {},
-});
 
 export default result;

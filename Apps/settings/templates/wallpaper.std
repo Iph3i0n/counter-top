@@ -1,0 +1,74 @@
+<s:meta name="settings-wallpaper">
+  <attr name="current" type="string"></attr>
+</s:meta>
+
+<script>
+  import Photos from "../ui/photos.ts";
+
+  function update_wallpaper(photo) {
+    return () => {
+      self.dispatchEvent(
+        new CustomEvent("value_change", { detail: photo.file })
+      );
+    };
+  }
+</script>
+
+<style>
+  img {
+    object-fit: contain;
+    width: 100%;
+    border-radius: 0.5rem;
+  }
+
+  .wallpaper-button {
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color 200ms;
+  }
+
+  .wallpaper-button:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+
+  t-paragraph {
+    padding: 0.5rem;
+    margin: 0;
+  }
+</style>
+
+<div>
+  <l-row>
+    <l-col xs="12">
+      <t-heading level="h4">Wallpaper</t-heading>
+    </l-col>
+    <s:for subject=":Photos" key="photo">
+      <l-col xs="12" sm="6" md="4" lg="3" xl="2">
+        <d-panel
+          class="wallpaper-button"
+          colour=":self.current === photo.file ? 'surface' : 'body'"
+          on:click="update_wallpaper(photo)"
+        >
+          <img src=":`/os/public/wallpapers/${photo.file}`" />
+          <t-paragraph>
+            <s:text use=":photo.name" />
+            <br />
+            <small>
+              Author:
+              <br />
+              <t-link href=":photo.credit.url" target="_blank" private>
+                <s:text use=":photo.credit.author" />
+              </t-link>
+              <br />
+              Website:
+              <br />
+              <t-link href=":photo.credit.site.url" target="_blank" private>
+                <s:text use=":photo.credit.site.name" />
+              </t-link>
+            </small>
+          </t-paragraph>
+        </d-panel>
+      </l-col>
+    </s:for>
+  </l-row>
+</div>

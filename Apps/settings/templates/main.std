@@ -1,13 +1,51 @@
 <s:meta name="settings-main"> </s:meta>
 
 <script>
-  console.log("Hello world");
+  let data = await Invoke("get_user");
+
+  async function on_change_password(e) {
+    const data = e.FormData;
+
+    if (data.password !== data.confirm_password) alert("Passwords must match");
+
+    await Invoke("update_user", { password: data.password });
+  }
+
+  async function update_email(e) {
+    await Invoke("update_user", { email: e.Value });
+  }
+
+  async function update_wallpaper(e) {
+    await Invoke("update_user", { wallpaper: e.detail });
+    data = await Invoke("get_user");
+  }
 </script>
 
-<style>
-  div {
-    color: red;
-  }
-</style>
-
-<div>Hello world</div>
+<div>
+  <l-row>
+    <l-col xs="12">
+      <f-input prefill=":data.email" on:ValueChanged="update_email">
+        Email
+      </f-input>
+    </l-col>
+  </l-row>
+  <f-form submit="event-only" on:Submitted="on_change_password">
+    <l-row>
+      <l-col xs="12" md="6">
+        <f-input name="password" type="password" sensitive> Password </f-input>
+      </l-col>
+      <l-col xs="12" md="6">
+        <f-input name="confirm_password" type="password" sensitive>
+          Confirm Password
+        </f-input>
+      </l-col>
+      <l-col xs="12">
+        <f-button type="submit"> Submit </f-button>
+      </l-col>
+    </l-row>
+  </f-form>
+  <settings-wallpaper
+    current=":data.wallpaper"
+    on:value_change="update_wallpaper"
+  ></settings-wallpaper>
+</div>

@@ -5,6 +5,7 @@
 <script>
   import key_handlers from "../utils/key_events.ts";
   import OpenWindowEvent from "../utils/open_window_event.ts";
+  import { ClearCookie } from "../utils/cookie.ts";
 
   const session = await self.connection.Send("execute", "session");
   let state = "open";
@@ -67,6 +68,11 @@
     if (is_fullscreen()) close_fullscreen();
     else open_fullscreen();
   }
+
+  function logout() {
+    ClearCookie();
+    self.connection.Close();
+  }
 </script>
 
 <style>
@@ -104,4 +110,5 @@
   connection=":self.connection"
   on:enter_fullscreen="fullscreen"
   on:open_apps="toggle_explorer"
+  on:logout="logout"
 ></os-command-pallette>
