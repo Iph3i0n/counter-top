@@ -9,6 +9,8 @@
 <script>
   import c from "../utils/class_names.ts";
 
+  if (!window.counter_top_z_index) window.counter_top_z_index = 1;
+
   const iframe = CreateRef();
   const corner = CreateRef();
   const bounds = self.bounds || {
@@ -21,6 +23,7 @@
   let title;
   let open_menu;
   let menus = [];
+  let z_index = window.counter_top_z_index++;
 
   function toggle_menu(item) {
     return () => {
@@ -60,6 +63,9 @@
   }
 
   $on_mousedown: {
+    z_index = window.counter_top_z_index++;
+    self.should_render();
+
     const instance = iframe.current;
     instance.style.pointerEvents = "none";
     event.preventDefault();
@@ -74,6 +80,7 @@
 
     window.onmousemove = (e) => {
       e.preventDefault();
+      instance.style.pointerEvents = "none";
       const new_x = e.clientX - offset_x;
       const new_y = e.clientY - offset_y;
       bounds.top = new_y + "px";
@@ -114,6 +121,7 @@
     left: ":bounds.left";
     width: ":bounds.width";
     height: ":bounds.height";
+    z-index: ":z_index";
   }
 
   iframe {
