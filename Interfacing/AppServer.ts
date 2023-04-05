@@ -30,6 +30,8 @@ type BasicContext<TLocal extends Schema, TGlobal extends Schema> = {
   OpenWindow(location: string, name: string, bounds?: Bounds): Promise<void>;
   EndApp(): Promise<void>;
   readonly UserId: string;
+  readonly UserDir: string;
+  readonly GlobalDir: string;
 };
 
 export default function CreateAppServer<
@@ -75,6 +77,14 @@ export default function CreateAppServer<
 
       get UserId() {
         return ctx.user_id;
+      },
+
+      get UserDir() {
+        return ctx.location.user_state;
+      },
+
+      get GlobalDir() {
+        return ctx.location.global_state;
       },
     };
 

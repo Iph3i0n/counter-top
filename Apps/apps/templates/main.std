@@ -1,0 +1,29 @@
+<s:meta name="apps-main"> </s:meta>
+
+<script>
+  function to_data_url(file) {
+    return new Promise((res) => {
+      const reader = new FileReader();
+      reader.addEventListener("load", () => res(reader.result));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function submit(e) {
+    const data = e.FormData;
+
+    debugger;
+    await Invoke("install_app", await to_data_url(data.app));
+  }
+</script>
+
+<f-form submit="event-only" on:Submitted="submit">
+  <l-row>
+    <l-col xs="12">
+      <f-file name="app" accept="application/zip">App Zip</f-file>
+    </l-col>
+    <l-col xs="12">
+      <f-button type="submit">Submit</f-button>
+    </l-col>
+  </l-row>
+</f-form>

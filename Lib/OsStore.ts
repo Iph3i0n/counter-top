@@ -43,6 +43,14 @@ if (initialise)
         admin: true,
         system: true,
       },
+      apps: {
+        version: "v1",
+        name: "Apps",
+        entry_point: Path.resolve(DefaultAppsDir, "apps", "app.ts"),
+        ui_dir: Path.resolve(DefaultAppsDir, "apps"),
+        admin: true,
+        system: true,
+      },
     },
     users:
       AdminUsers?.reduce(
