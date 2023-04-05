@@ -1,6 +1,33 @@
 <s:meta name="apps-main"> </s:meta>
 
 <script>
+  let apps = await Invoke("list_apps");
+
+  async function refresh() {
+    apps = await Invoke("list_apps");
+  }
+
+  function elevate(app) {
+    return async () => {
+      await Invoke("elevate_app", app.id);
+      await refresh();
+    };
+  }
+
+  function demote(app) {
+    return async () => {
+      await Invoke("demote_app", app.id);
+      await refresh();
+    };
+  }
+
+  function remove(app) {
+    return async () => {
+      await Invoke("remove_app", app.id);
+      await refresh();
+    };
+  }
+
   function to_data_url(file) {
     return new Promise((res) => {
       const reader = new FileReader();
@@ -12,10 +39,39 @@
   async function submit(e) {
     const data = e.FormData;
 
-    debugger;
     await Invoke("install_app", await to_data_url(data.app));
+    await refresh();
   }
 </script>
+
+<style>
+  .button {
+    display: inline-block;
+    margin: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    transition: background-color 200ms;
+    cursor: pointer;
+  }
+
+  .button.active {
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  .button.active:hover {
+    background: rgba(0, 0, 0, 0);
+  }
+
+  .button:hover {
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  d-listgroup > span {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+</style>
 
 <f-form submit="event-only" on:Submitted="submit">
   <l-row>
@@ -23,7 +79,34 @@
       <f-file name="app" accept="application/zip">App Zip</f-file>
     </l-col>
     <l-col xs="12">
-      <f-button type="submit">Submit</f-button>
+      <f-button type="submit">Upload</f-button>
     </l-col>
   </l-row>
 </f-form>
+
+<l-row>
+  <l-col xs="12">
+    <d-listgroup>
+      <s:for subject=":apps" key="app">
+        <span>
+          <s:text use=":app.name" />
+          <span>
+            <s:if check=":app.admin">
+              <span class="active button" on:click="demote(app)">
+                <t-icon name="admin" colour="body" text></t-icon>
+              </span>
+            </s:if>
+            <s:if check=":!app.admin">
+              <span class="button" on:click="elevate(app)">
+                <t-icon name="admin" colour="body" text></t-icon>
+              </span>
+            </s:if>
+            <span class="button" on:click="remove(app)">
+              <t-icon name="delete-bin" colour="body" text></t-icon>
+            </span>
+          </span>
+        </span>
+      </s:for>
+    </d-listgroup>
+  </l-col>
+</l-row>

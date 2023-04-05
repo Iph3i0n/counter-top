@@ -16,7 +16,19 @@ const Server = CreateAppServer({}, {}, (c) => {
     width: "800px",
     height: "600px",
   }).then(() => c.EndApp());
-  return c;
+  return {
+    ...c,
+    async AppExists(app_id: string) {
+      try {
+        const stat = await Deno.stat(Path.join(c.GlobalDir, app_id));
+
+        return stat.isDirectory;
+      } catch (err) {
+        if (err instanceof Deno.errors.NotFound) return false;
+        throw err;
+      }
+    },
+  };
 });
 
 const ZIP_START = "data:application/zip;base64,";
@@ -87,6 +99,7 @@ Server.CreateHandler("list_apps", async ({ GlobalDir, OsStore }, sender) => {
   for await (const entry of Deno.readDir(GlobalDir)) {
     const store_item = OsStore.Model.apps[entry.name];
     result.push({
+      id: entry.name,
       name: store_item.name,
       admin: store_item.admin,
     });
@@ -95,16 +108,53 @@ Server.CreateHandler("list_apps", async ({ GlobalDir, OsStore }, sender) => {
   return result;
 });
 
-Server.CreateHandler("elevate_app", ({ OsStore }, sender, app_id) => {
-  if (sender !== "client") return "denied";
+Server.CreateHandler(
+  "elevate_app",
+  async ({ OsStore, AppExists }, sender, app_id) => {
+    if (sender !== "client") return "denied";
+    if (!(await AppExists(app_id))) return "not found";
 
-  const store_item = OsStore.Model.apps[app_id];
-  OsStore.Write({
-    apps: {
-      [app_id]: {
-        ...store_item,
-        admin: true,
+    const store_item = OsStore.Model.apps[app_id];
+    OsStore.Write({
+      apps: {
+        [app_id]: {
+          ...store_item,
+          admin: true,
+        },
       },
-    },
-  });
-});
+    });
+  }
+);
+
+Server.CreateHandler(
+  "remove_app",
+  async ({ OsStore, AppExists, GlobalDir }, sender, app_id) => {
+    if (sender !== "client") return "denied";
+    if (!(await AppExists(app_id))) return "not found";
+
+    await Deno.remove(Path.join(GlobalDir, app_id), { recursive: true });
+    OsStore.Write({
+      apps: {
+        [app_id]: undefined,
+      },
+    });
+  }
+);
+
+Server.CreateHandler(
+  "demote_app",
+  async ({ OsStore, AppExists }, sender, app_id) => {
+    if (sender !== "client") return "denied";
+    if (!(await AppExists(app_id))) return "not found";
+
+    const store_item = OsStore.Model.apps[app_id];
+    OsStore.Write({
+      apps: {
+        [app_id]: {
+          ...store_item,
+          admin: false,
+        },
+      },
+    });
+  }
+);
