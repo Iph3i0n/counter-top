@@ -5,6 +5,7 @@ import * as Zip from "../../deps/zipjs.ts";
 import { IsObject, IsString, Assert, Optional } from "../../deps/type_guard.ts";
 import * as BCrypt from "../../deps/bcrypt.ts";
 import { ASCII, Struct, UTF8, Array } from "../../deps/moulding_tin.ts";
+import { marky } from "../../deps/markdown.ts";
 
 const IsManifest = IsObject({
   name: IsString,
@@ -19,7 +20,7 @@ const Server = CreateAppServer(
       website: new ASCII(),
       release_url: new ASCII(),
       icon_url: new ASCII(),
-      description: new UTF8(),
+      readme_url: new ASCII(),
       short_description: new UTF8(),
       author: new UTF8(),
       current_version: new ASCII(),
@@ -99,7 +100,6 @@ const Server = CreateAppServer(
               );
 
           await reader.close();
-
           const manifest = JSON.parse(
             await Deno.readTextFile(Path.join(app_dir, "app.manifest.json"))
           );
@@ -120,7 +120,7 @@ const Server = CreateAppServer(
           });
         } catch (err) {
           console.error(err);
-          await Deno.remove(app_dir, { recursive: true });
+          // await Deno.remove(app_dir, { recursive: true });
           return "install_failed";
         }
       },
@@ -275,7 +275,8 @@ Server.CreateHandler(
 
 Server.CreateHandler(
   "app_store:listing",
-  async ({ UserState, StoreAppExists }) => {
+  async ({ UserState, StoreAppExists, UserIsAdmin }, sender) => {
+    if (sender !== "client" || !UserIsAdmin) return "denied";
     const result = [];
     for (const [id, value] of UserState.Model.apps)
       result.push({
@@ -284,6 +285,7 @@ Server.CreateHandler(
         author: value.author,
         description: value.short_description,
         installed: await StoreAppExists(id),
+        icon: value.icon_url,
       });
 
     return result;
@@ -291,9 +293,39 @@ Server.CreateHandler(
 );
 
 Server.CreateHandler(
+  "app_store:details",
+  async (
+    { UserState, StoreAppExists, UserIsAdmin },
+    sender,
+    app_id: string
+  ) => {
+    if (sender !== "client" || !UserIsAdmin) return "denied";
+    const target = UserState.Model.apps[app_id];
+    if (!target) return "not found";
+    const readme_data = await fetch(target.readme_url).then((r) => r.text());
+    return {
+      id: app_id,
+      name: target.name,
+      website: target.website,
+      icon: target.icon_url,
+      readme: marky(readme_data),
+      author: target.author,
+      current_version: target.current_version,
+      tags: target.tags,
+      installed: await StoreAppExists(app_id),
+    };
+  }
+);
+
+Server.CreateHandler(
   "app_store:install",
-  async ({ UserState, StoreAppPath, InstallApp }, app_store_id: string) => {
+  async (
+    { UserState, StoreAppPath, InstallApp, UserIsAdmin },
+    sender,
+    app_store_id: string
+  ) => {
     const data = UserState.Model.apps[app_store_id];
+    if (sender !== "client" || !UserIsAdmin) return "denied";
     if (!data) return "not found";
 
     const zip_data = await fetch(data.release_url).then((r) => r.arrayBuffer());

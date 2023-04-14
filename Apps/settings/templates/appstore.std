@@ -1,32 +1,144 @@
 <s:meta name="settings-appstore"></s:meta>
 
 <script>
+  let current_app;
   const listing = await Invoke("app_store:listing");
+
+  function open_app(app) {
+    return async () => {
+      current_app = await Invoke("app_store:details", app.id);
+    };
+  }
+
+  function install_app(app) {
+    return async () => {
+      await Invoke("app_store:install", app.id);
+    };
+  }
+
+  function remove_app(app) {
+    return async () => {
+      await Invoke("app_store:remove_app", app.id);
+    };
+  }
 </script>
 
+<style>
+  .app-item {
+    cursor: pointer;
+    transition: background-color 200ms;
+    padding: 1rem;
+  }
+
+  .app-item:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+
+  .tag {
+    display: inline-block;
+    background-color: rgba(0, 0, 0, 0.1);
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+    margin: 0.25rem;
+  }
+
+  .close-button {
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    transition: background-color 200ms;
+  }
+
+  .close-button:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+
+  .listing-title {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .listing-title img {
+    padding: 0.5rem;
+  }
+
+  small {
+    padding: 0.5rem;
+  }
+</style>
+
 <div>
-  <s:for subject=":listing" key="item">
+  <s:if check=":!current_app">
+    <s:for subject=":listing" key="item">
+      <l-row no-padding no-gap>
+        <l-col xs="12" class="app-item" on:click="open_app(item)">
+          <t-heading level="h6" class="listing-title">
+            <img src=":item.icon" />
+            <s:text use=":item.name" />
+            <s:if check=":item.installed">
+              <small>Installed</small>
+            </s:if>
+          </t-heading>
+          <t-paragraph>
+            <s:text use=":item.description" />
+          </t-paragraph>
+        </l-col>
+      </l-row>
+    </s:for>
+  </s:if>
+  <s:if check=":current_app">
     <l-row>
-      <l-col xs="12">
-        <t-heading level="h6">
-          <s:text use=":item.name" />
-        </t-heading>
+      <l-col xs="12" md="8">
+        <div class="close-button" on:click="() => current_app = undefined">
+          <t-icon name="arrow-left" colour="body" text></t-icon>
+        </div>
+        <t-richtext use=":{ html: current_app.readme }"></t-richtext>
       </l-col>
-      <l-col xs="12" sm="8">
-        <t-paragraph>
-          <s:text use=":item.description" />
-        </t-paragraph>
-      </l-col>
-      <l-col xs="12" sm="4" style="text-align: right">
-        <f-button type="button" colour=":item.installed ? 'body' : 'primary'">
-          <s:if check=":item.installed">
-            Installed
+      <l-col xs="12" md="4">
+        <d-card>
+          <span slot="title">
+            <s:text use=":current_app.name" />
+          </span>
+          <t-paragraph>
+            Author:
+            <s:text use=":' ' + current_app.author" />
+          </t-paragraph>
+          <t-paragraph>
+            Current Version:
+            <s:text use=":' ' + current_app.current_version" />
+          </t-paragraph>
+          <t-paragraph>
+            Tags:
+            <s:for subject=":current_app.tags" key="tag">
+              <span class="tag">
+                <s:text use=":tag" />
+              </span>
+            </s:for>
+          </t-paragraph>
+          <s:if check=":current_app.installed">
+            <f-button
+              type="button"
+              colour="body"
+              on:click="remove_app(current_app)"
+            >
+              Remove
+            </f-button>
           </s:if>
-          <s:if check=":!item.installed">
-            Install
+          <s:if check=":!current_app.installed">
+            <f-button
+              type="button"
+              colour="primary"
+              on:click="install_app(current_app)"
+            >
+              Install
+            </f-button>
           </s:if>
-        </f-button>
+          <t-link href=":current_app.website" target="_blank" private block>
+            Website
+          </t-link>
+        </d-card>
       </l-col>
     </l-row>
-  </s:for>
+  </s:if>
 </div>
