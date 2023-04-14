@@ -26,16 +26,7 @@ if (initialise)
         ui_dir: Path.resolve(DefaultAppsDir, "files"),
         admin: false,
         system: true,
-        release: "system"
-      },
-      notes: {
-        version: "v1",
-        name: "Notes",
-        entry_point: Path.resolve(DefaultAppsDir, "notes", "app.ts"),
-        ui_dir: Path.resolve(DefaultAppsDir, "notes"),
-        admin: false,
-        system: true,
-        release: "system"
+        release: "system",
       },
       settings: {
         version: "v1",
@@ -44,7 +35,7 @@ if (initialise)
         ui_dir: Path.resolve(DefaultAppsDir, "settings"),
         admin: true,
         system: true,
-        release: "system"
+        release: "system",
       },
     },
     users:

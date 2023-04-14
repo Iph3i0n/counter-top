@@ -18,6 +18,7 @@ const Server = CreateAppServer(
       name: new UTF8(),
       website: new ASCII(),
       release_url: new ASCII(),
+      icon_url: new ASCII(),
       description: new UTF8(),
       short_description: new UTF8(),
       author: new UTF8(),
