@@ -1,1 +1,1 @@
-export * from "https://deno.land/x/moulding_tin@0.0.5/mod.ts";
+export * from "https://deno.land/x/moulding_tin@1.1.0/mod.ts";

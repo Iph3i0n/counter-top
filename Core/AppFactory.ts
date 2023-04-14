@@ -30,6 +30,7 @@ Server.CreateHandler(
           permissions: {
             read: privileges,
             write: privileges,
+            net: "inherit",
           },
         },
       },
@@ -37,6 +38,7 @@ Server.CreateHandler(
         location,
         args,
         user_id,
+        user_is_admin: Store.Model.users[user_id].is_admin,
       },
       {
         execute: async (

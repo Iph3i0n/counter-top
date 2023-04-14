@@ -4,6 +4,7 @@ import {
   IsString,
   Optional,
   Assert,
+  IsBoolean,
 } from "../deps/type_guard.ts";
 import CreateServer from "./WorkerServer.ts";
 import { Directory, Schema } from "../deps/fs_db.ts";
@@ -18,6 +19,7 @@ const IsAppStartup = IsObject({
     system_state: Optional(IsString),
   }),
   user_id: IsString,
+  user_is_admin: IsBoolean,
   args: Optional(DoNotCare),
 });
 
@@ -31,6 +33,7 @@ type BasicContext<TLocal extends Schema, TGlobal extends Schema> = {
   EndApp(): Promise<void>;
   readonly UserId: string;
   readonly UserDir: string;
+  readonly UserIsAdmin: boolean;
   readonly GlobalDir: string;
 };
 
@@ -85,6 +88,10 @@ export default function CreateAppServer<
 
       get GlobalDir() {
         return ctx.location.global_state;
+      },
+
+      get UserIsAdmin() {
+        return ctx.user_is_admin;
       },
     };
 

@@ -6,9 +6,7 @@
     "notes:dev": "(cd ./notes && deno task dev)",
     "settings:build": "(cd ./settings && deno task build)",
     "settings:dev": "(cd ./settings && deno task dev)",
-    "apps:build": "(cd ./apps && deno task build)",
-    "apps:dev": "(cd ./apps && deno task dev)",
-    "all:build": "deno task files:build ; deno task notes:build ; deno task settings:build ; deno task apps:build",
-    "all:dev": "deno task files:dev & deno task notes:dev & deno task settings:dev & deno task apps:dev"
+    "all:build": "deno task files:build ; deno task notes:build ; deno task settings:build",
+    "all:dev": "deno task files:dev & deno task notes:dev & deno task settings:dev"
   }
 }

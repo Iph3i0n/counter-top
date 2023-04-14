@@ -1,9 +1,0 @@
-{
-  "templates": ["./templates/main.std"],
-  "description": "The main client for the OS",
-  "global_css": "./global.pss",
-  "docs": {
-    "value_sets": []
-  },
-  "package": {}
-}

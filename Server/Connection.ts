@@ -14,14 +14,26 @@ export default function MakeConnection(socket: WebSocket, user_id: string) {
       },
       { user_id },
       {
-        async open_window(app: string, location: string, name: string, bounds: unknown) {
-          return await server.Postback("open_window", app, location, name, bounds);
+        async open_window(
+          app: string,
+          location: string,
+          name: string,
+          bounds: unknown
+        ) {
+          return await server.Postback(
+            "open_window",
+            app,
+            location,
+            name,
+            bounds
+          );
         },
       }
     );
 
     socket.onclose = () => {
       worker.Close();
+      console.log(`Session closed for ${user_id}`);
     };
 
     return worker;

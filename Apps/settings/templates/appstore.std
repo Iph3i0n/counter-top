@@ -1,0 +1,32 @@
+<s:meta name="settings-appstore"></s:meta>
+
+<script>
+  const listing = await Invoke("app_store:listing");
+</script>
+
+<div>
+  <s:for subject=":listing" key="item">
+    <l-row>
+      <l-col xs="12">
+        <t-heading level="h6">
+          <s:text use=":item.name" />
+        </t-heading>
+      </l-col>
+      <l-col xs="12" sm="8">
+        <t-paragraph>
+          <s:text use=":item.description" />
+        </t-paragraph>
+      </l-col>
+      <l-col xs="12" sm="4" style="text-align: right">
+        <f-button type="button" colour=":item.installed ? 'body' : 'primary'">
+          <s:if check=":item.installed">
+            Installed
+          </s:if>
+          <s:if check=":!item.installed">
+            Install
+          </s:if>
+        </f-button>
+      </l-col>
+    </l-row>
+  </s:for>
+</div>

@@ -1,5 +1,11 @@
 {
-  "templates": ["./templates/main.std", "./templates/wallpaper.std"],
+  "templates": [
+    "./templates/main.std",
+    "./templates/wallpaper.std",
+    "./templates/user.std",
+    "./templates/apps.std",
+    "./templates/appstore.std"
+  ],
   "description": "The main client for the OS",
   "global_css": "./global.pss",
   "docs": {

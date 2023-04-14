@@ -16,6 +16,7 @@ export default {
       ui_dir: new ASCII(),
       admin: new Bool(),
       system: new Bool(),
+      release: new ASCII(),
     })
   ),
   users: new Union(

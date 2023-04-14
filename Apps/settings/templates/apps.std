@@ -1,29 +1,29 @@
-<s:meta name="apps-main"> </s:meta>
+<s:meta name="settings-apps"> </s:meta>
 
 <script>
-  let apps = await Invoke("list_apps");
+  let apps = await Invoke("manual:list_apps");
 
   async function refresh() {
-    apps = await Invoke("list_apps");
+    apps = await Invoke("manual:list_apps");
   }
 
   function elevate(app) {
     return async () => {
-      await Invoke("elevate_app", app.id);
+      await Invoke("manual:elevate_app", app.id);
       await refresh();
     };
   }
 
   function demote(app) {
     return async () => {
-      await Invoke("demote_app", app.id);
+      await Invoke("manual:demote_app", app.id);
       await refresh();
     };
   }
 
   function remove(app) {
     return async () => {
-      await Invoke("remove_app", app.id);
+      await Invoke("manual:remove_app", app.id);
       await refresh();
     };
   }
@@ -39,7 +39,7 @@
   async function submit(e) {
     const data = e.FormData;
 
-    await Invoke("install_app", await to_data_url(data.app));
+    await Invoke("manual:install_app", await to_data_url(data.app));
     await refresh();
   }
 </script>
