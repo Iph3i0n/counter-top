@@ -13,7 +13,10 @@ if (!counter_top_data_dir) {
   Deno.exit(1);
 }
 
-const store = new Directory(OsSchema, counter_top_data_dir);
+const store = new Directory(
+  OsSchema,
+  Path.resolve(counter_top_data_dir, "os-data", "core")
+);
 const data = JSON.parse(await Deno.readTextFile("app.manifest.json"));
 
 if (!data.name || !data.main) {

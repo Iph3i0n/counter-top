@@ -59,8 +59,10 @@ const Server = CreateAppServer(
       height: "600px",
     }).then(() => c.EndApp());
 
+    const ManualDir = Path.join(c.GlobalDir, "manual");
+
     function ManualAppPath(app_id: string) {
-      return Path.join(c.GlobalDir, "manual", app_id);
+      return Path.join(ManualDir, app_id);
     }
 
     function StoreAppPath(app_id: string) {
@@ -69,6 +71,7 @@ const Server = CreateAppServer(
 
     return {
       ...c,
+      ManualDir,
       async ManualAppExists(app_id: string) {
         try {
           const stat = await Deno.stat(ManualAppPath(app_id));
@@ -201,17 +204,21 @@ Server.CreateHandler(
 
 Server.CreateHandler(
   "manual:list_apps",
-  async ({ GlobalDir, OsStore, UserIsAdmin }, sender) => {
+  async ({ ManualDir, OsStore, UserIsAdmin }, sender) => {
     if (sender !== "client" || !UserIsAdmin) return "denied";
 
     const result = [];
-    for await (const entry of Deno.readDir(GlobalDir)) {
-      const store_item = OsStore.Model.apps[entry.name];
-      result.push({
-        id: entry.name,
-        name: store_item.name,
-        admin: store_item.admin,
-      });
+    try {
+      for await (const entry of Deno.readDir(ManualDir)) {
+        const store_item = OsStore.Model.apps[entry.name];
+        result.push({
+          id: entry.name,
+          name: store_item.name,
+          admin: store_item.admin,
+        });
+      }
+    } catch (err) {
+      console.error(err);
     }
 
     return result;
@@ -239,14 +246,14 @@ Server.CreateHandler(
 Server.CreateHandler(
   "manual:remove_app",
   async (
-    { OsStore, ManualAppExists, GlobalDir, UserIsAdmin },
+    { OsStore, ManualAppExists, ManualAppPath, UserIsAdmin },
     sender,
     app_id
   ) => {
     if (sender !== "client" || !UserIsAdmin) return "denied";
     if (!(await ManualAppExists(app_id))) return "not found";
 
-    await Deno.remove(Path.join(GlobalDir, app_id), { recursive: true });
+    await Deno.remove(ManualAppPath(app_id), { recursive: true });
     OsStore.Write({
       apps: {
         [app_id]: undefined,
@@ -355,14 +362,14 @@ Server.CreateHandler(
 Server.CreateHandler(
   "app_store:remove_app",
   async (
-    { OsStore, StoreAppExists, GlobalDir, UserIsAdmin },
+    { OsStore, StoreAppExists, StoreAppPath, UserIsAdmin },
     sender,
     app_id
   ) => {
     if (sender !== "client" || !UserIsAdmin) return "denied";
     if (!(await StoreAppExists(app_id))) return "not found";
 
-    await Deno.remove(Path.join(GlobalDir, app_id), { recursive: true });
+    await Deno.remove(StoreAppPath(app_id), { recursive: true });
     OsStore.Write({
       apps: {
         [app_id]: undefined,

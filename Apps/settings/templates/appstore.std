@@ -2,7 +2,7 @@
 
 <script>
   let current_app;
-  const listing = await Invoke("app_store:listing");
+  let listing = await Invoke("app_store:listing");
 
   function open_app(app) {
     return async () => {
@@ -13,12 +13,16 @@
   function install_app(app) {
     return async () => {
       await Invoke("app_store:install", app.id);
+      current_app = await Invoke("app_store:details", app.id);
+      listing = await Invoke("app_store:listing");
     };
   }
 
   function remove_app(app) {
     return async () => {
       await Invoke("app_store:remove_app", app.id);
+      current_app = await Invoke("app_store:details", app.id);
+      listing = await Invoke("app_store:listing");
     };
   }
 </script>
