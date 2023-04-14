@@ -17,10 +17,17 @@ export default function SpawnServer(
   return new Promise<{
     Send(command: string, ...args: any): Promise<any>;
     Close(): void;
-  }>((res, rej) => {
-    const worker = new Worker(Path.toFileUrl(path), {
+  }>(async (res, rej) => {
+    const input_path =
+      Path.toFileUrl(path) +
+      (Deno.env.get("DEV") ? `?v=${crypto.randomUUID()}` : "");
+    const worker = new Worker(input_path, {
       ...options,
       type: "module",
+    });
+
+    await new Promise((res) => {
+      worker.addEventListener("message", res, { once: true });
     });
 
     const respond = (data: Response) => worker.postMessage(data);
@@ -83,24 +90,22 @@ export default function SpawnServer(
         worker.postMessage(final);
       });
 
-    setTimeout(async () => {
-      const response = await send({ type: "start", context: data });
-      clearTimeout(timeout);
-      if (response !== "started") {
-        worker.terminate();
-        rej(response);
-        return;
-      }
+    const response = await send({ type: "start", context: data });
+    clearTimeout(timeout);
+    if (response !== "started") {
+      worker.terminate();
+      rej(response);
+      return;
+    }
 
-      res({
-        Send(command, ...args) {
-          return send({ command, args });
-        },
-        Close() {
-          worker.terminate();
-        },
-      });
-    }, 100);
+    res({
+      Send(command, ...args) {
+        return send({ command, args });
+      },
+      Close() {
+        worker.terminate();
+      },
+    });
   });
 }
 

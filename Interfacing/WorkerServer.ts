@@ -56,6 +56,9 @@ export default function CreateServer<TContext = any>(
     }
   });
 
+  setTimeout(() => {
+    self.postMessage("ready");
+  }, 20);
   return {
     CreateHandler(name: string, handler: Handler<TContext>) {
       handlers[name] = handler;
