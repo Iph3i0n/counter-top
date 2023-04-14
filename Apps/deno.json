@@ -2,11 +2,12 @@
   "tasks": {
     "files:build": "(cd ./files && deno task build)",
     "files:dev": "(cd ./files && deno task dev)",
-    "notes:build": "(cd ./notes && deno task build)",
-    "notes:dev": "(cd ./notes && deno task dev)",
+    "files:prepare": "(cd ./files && deno task prepare)",
     "settings:build": "(cd ./settings && deno task build)",
     "settings:dev": "(cd ./settings && deno task dev)",
+    "settings:prepare": "(cd ./settings && deno task prepare)",
     "all:build": "deno task files:build ; deno task notes:build ; deno task settings:build",
+    "all:prepare": "deno task files:prepare ; deno task notes:prepare ; deno task settings:prepare",
     "all:dev": "deno task files:dev & deno task notes:dev & deno task settings:dev"
   }
 }

@@ -11,9 +11,11 @@
   "tasks": {
     "install": "deno install --allow-all https://deno.land/x/wholemeal@1.0.5/main.ts",
     "server:start": "(cd ./Server && deno task start)",
+    "server:prepare": "(cd ./Server && deno task prepare)",
     "ui:dev": "(cd ./Client && deno task dev)",
     "ui:build": "(cd ./Client && deno task build)",
     "apps:dev": "(cd ./Apps && deno task all:dev)",
-    "apps:build": "(cd ./Apps && deno task all:build)"
+    "apps:build": "(cd ./Apps && deno task all:build)",
+    "apps:prepare": "(cd ./Apps && deno task all:prepare)"
   }
 }

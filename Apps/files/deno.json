@@ -1,6 +1,7 @@
 {
   "tasks": {
     "build": "wholemeal build",
-    "dev": "wholemeal dev"
+    "dev": "wholemeal dev",
+    "prepare": "deno cache ./app.ts"
   }
 }
