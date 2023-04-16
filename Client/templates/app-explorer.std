@@ -7,14 +7,31 @@
   const apps = await self.connection.Send("execute", "list_apps");
   let running = [];
 
-  function LaunchApp(detail) {
+  function LaunchApp(app) {
     return () => {
-      self.dispatchEvent(new CustomEvent("app_launched", { detail }));
+      self.dispatchEvent(
+        new CustomEvent("app_launched", { detail: [app.id, app.name] })
+      );
+
+      app.running = true;
     };
   }
 
   function close_explorer() {
     self.dispatchEvent(new CustomEvent("explorer_closed"));
+  }
+
+  function CloseApp(app) {
+    /** @param {Event} e */
+    return (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      self.dispatchEvent(
+        new CustomEvent("app_closed", { detail: [app.id, app.name] })
+      );
+
+      app.running = false;
+    };
   }
 </script>
 
@@ -28,10 +45,18 @@
     height: 100vh;
     box-sizing: border-box;
 
-    opacity: ":self.open === 'open' ? '1' : '0'";
-    pointer-events: ":self.open === 'open' ? 'all' : 'none'";
+    opacity: 0;
+    pointer-events: none;
 
     transition: opacity 200ms;
+    z-index: 99999;
+  }
+
+  @if self.open === "open" {
+    :host {
+      opacity: 1;
+      pointer-events: all;
+    }
   }
 
   .content {
@@ -79,13 +104,14 @@
 </div>
 
 <div class="content">
-  <s:for subject=":apps" key="[id, name]">
+  <s:for subject=":apps" key="app">
     <div>
-      <f-button colour="surface" on:click="LaunchApp([id, name])">
-        <img src=":`/apps/${id}/public/icon.svg`" />
-        <t-paragraph>
-          <s:text use=":name" />
-        </t-paragraph>
+      <f-button colour="surface" on:click="LaunchApp(app)">
+        <img src=":`/apps/${app.id}/public/icon.svg`" />
+        <s:text use=":app.name" />
+        <s:if check=":app.running">
+          <t-badge on:click="CloseApp(app)">X</t-badge>
+        </s:if>
       </f-button>
     </div>
   </s:for>

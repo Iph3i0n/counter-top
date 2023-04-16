@@ -8,16 +8,26 @@ const IsContext = IsObject({
   user_id: IsString,
 });
 
-const Server = CreateServer((context) => {
-  Assert(IsContext, context);
-  return { loc: new LocationStore(context.user_id), user_id: context.user_id };
-});
-
 const RunningApps: Record<string, SpawnedWorker> = {};
 
+const Server = CreateServer((context) => {
+  Assert(IsContext, context);
+  return {
+    loc: new LocationStore(context.user_id),
+    user_id: context.user_id,
+    async IsRunning(id: string) {
+      return !!(await RunningApps[id]);
+    },
+  };
+});
 Server.CreateHandler(
   "load_app",
-  ({ loc, user_id }, app_id: string, ...args: Array<unknown>) => {
+  async (
+    { loc, user_id, IsRunning },
+    app_id: string,
+    ...args: Array<unknown>
+  ) => {
+    if (await IsRunning(app_id)) return;
     const location = loc.App(app_id);
     const privileges = [location.global_state, location.user_state];
     if (location.system_state) privileges.push(location.system_state);
@@ -75,13 +85,14 @@ Server.CreateHandler(
   }
 );
 
-Server.CreateHandler("is_running", async (_, app_id: string) => {
-  return !!(await RunningApps[app_id]);
-});
-
-Server.CreateHandler("list_apps", (_) => {
-  const result: Array<[string, string]> = [];
-  for (const [id, value] of Store.Model.apps) result.push([id, value.name]);
+Server.CreateHandler("list_apps", async ({ IsRunning }) => {
+  const result: Array<{ id: string; name: string; running: boolean }> = [];
+  for (const [id, value] of Store.Model.apps)
+    result.push({
+      id,
+      name: value.name,
+      running: await IsRunning(id),
+    });
   return result;
 });
 

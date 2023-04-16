@@ -17,9 +17,16 @@
     await self.connection.Send("execute", "load_app", id);
   }
 
-  function CloseApp(window) {
+  async function CloseApp(event) {
+    const [id, name] = event.detail;
+    toggle_explorer();
+    await self.connection.Send("execute", "close_app", id);
+    windows = windows.filter((w) => w.App !== id);
+  }
+
+  function CloseWindow(window) {
     return async () => {
-      windows = windows.filter((w) => w.App !== window.App);
+      windows = windows.filter((w) => w !== window);
       window.OnClose();
     };
   }
@@ -88,21 +95,11 @@
   }
 </style>
 
-<s:for subject=":windows" key="window">
-  <os-appwindow
-    app_id=":window.App"
-    name=":window.Name"
-    connection=":self.connection"
-    location=":window.Location"
-    bounds=":window.Bounds"
-    on:closed="CloseApp(window)"
-  ></os-appwindow>
-</s:for>
-
 <os-app-explorer
   connection=":self.connection"
   open=":state"
   on:app_launched="LaunchApp"
+  on:app_closed="CloseApp"
   on:explorer_closed="toggle_explorer"
 ></os-app-explorer>
 
@@ -112,3 +109,14 @@
   on:open_apps="toggle_explorer"
   on:logout="logout"
 ></os-command-pallette>
+
+<s:for subject=":windows" key="window">
+  <os-appwindow
+    app_id=":window.App"
+    name=":window.Name"
+    connection=":self.connection"
+    location=":window.Location"
+    bounds=":window.Bounds"
+    on:closed="CloseWindow(window)"
+  ></os-appwindow>
+</s:for>
