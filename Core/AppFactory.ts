@@ -28,6 +28,7 @@ Server.CreateHandler(
     ...args: Array<unknown>
   ) => {
     if (await IsRunning(app_id)) return;
+    console.log("opening app " + app_id);
     const location = loc.App(app_id);
     const privileges = [location.global_state, location.user_state];
     if (location.system_state) privileges.push(location.system_state);
@@ -67,8 +68,10 @@ Server.CreateHandler(
         close_app: async () => {
           const instance = await RunningApps[app_id];
           if (!instance) return "not running";
+          console.log("closing app" + app_id);
 
           instance.Close();
+          delete RunningApps[app_id];
         },
       }
     );
@@ -99,8 +102,10 @@ Server.CreateHandler("list_apps", async ({ IsRunning }) => {
 Server.CreateHandler("close_app", async (_, app_id: string) => {
   const instance = await RunningApps[app_id];
   if (!instance) return "not running";
+  console.log("closing app " + app_id);
 
-  return instance.Close();
+  instance.Close();
+  delete RunningApps[app_id];
 });
 
 Server.CreateHandler("session", ({ user_id }) => {

@@ -4,7 +4,7 @@
 </s:meta>
 
 <script>
-  const apps = await self.connection.Send("execute", "list_apps");
+  let apps = await self.connection.Send("execute", "list_apps");
   let running = [];
 
   function LaunchApp(app) {
@@ -32,6 +32,13 @@
 
       app.running = false;
     };
+  }
+
+  $props: {
+    if (event.Key === "open") {
+      apps = await self.connection.Send("execute", "list_apps");
+      self.should_render();
+    }
   }
 </script>
 

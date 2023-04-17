@@ -14,7 +14,7 @@ Server.CreateHandler("/os/session", "GET")
       if (!r.IsUpgradable) return { status: 400 };
 
       const { socket, response } = r.Upgrade();
-      await MakeConnection(socket, user_id);
+      MakeConnection(socket, user_id);
       return response;
     } catch {
       return { status: 403 };

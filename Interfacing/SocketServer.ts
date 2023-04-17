@@ -74,14 +74,14 @@ export default function CreateSocketServer<TContext = any>(
           const data = JSON.parse(data_raw);
           try {
             if (!IsResponse(data) || data.request_id !== request_id) return;
-            self.removeEventListener("message", handler);
+            socket.removeEventListener("message", handler);
             res(data.response);
           } catch (err) {
             console.error(err);
           }
         };
 
-        self.addEventListener("message", handler);
+        socket.addEventListener("message", handler);
         command({
           request_id,
           command: command_name,
