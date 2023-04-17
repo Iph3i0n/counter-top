@@ -123,7 +123,7 @@ const Server = CreateAppServer(
           });
         } catch (err) {
           console.error(err);
-          // await Deno.remove(app_dir, { recursive: true });
+          await Deno.remove(app_dir, { recursive: true });
           return "install_failed";
         }
       },
