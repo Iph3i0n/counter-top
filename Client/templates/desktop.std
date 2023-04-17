@@ -8,20 +8,26 @@
   import { ClearCookie } from "../utils/cookie.ts";
 
   const session = await self.connection.Send("execute", "session");
-  let state = "open";
+  let state = "app_explorer";
   let windows = [];
 
   async function LaunchApp(event) {
     const [id, name] = event.detail;
-    toggle_explorer();
+    toggle_state("app_explorer")();
     await self.connection.Send("execute", "load_app", id);
   }
 
   async function CloseApp(event) {
     const [id, name] = event.detail;
-    toggle_explorer();
+    toggle_state("app_explorer")();
     await self.connection.Send("execute", "close_app", id);
     windows = windows.filter((w) => w.App !== id);
+  }
+
+  async function close_window(event) {
+    const window = event.detail;
+    windows = windows.filter((w) => w !== window);
+    window.OnClose();
   }
 
   function CloseWindow(window) {
@@ -31,15 +37,22 @@
     };
   }
 
-  function toggle_explorer() {
-    state = state === "open" ? "closed" : "open";
+  function focus_window(event) {
+    const window = event.detail;
+    window.focus();
+  }
+
+  function toggle_state(target) {
+    return () => {
+      state = state === target ? "closed" : target;
+    };
   }
 
   document.addEventListener(
     "keyup",
     key_handlers({
       F12: () => {
-        toggle_explorer();
+        toggle_state("app_explorer")();
         self.should_render();
       },
     })
@@ -100,23 +113,29 @@
   open=":state"
   on:app_launched="LaunchApp"
   on:app_closed="CloseApp"
-  on:explorer_closed="toggle_explorer"
+  on:explorer_closed="toggle_state('app_explorer')"
 ></os-app-explorer>
+
+<os-window-browser
+  open=":state"
+  windows=":windows"
+  on:explorer_closed="toggle_state('window_browser')"
+  on:close_window="close_window"
+  on:focus_window="focus_window"
+></os-window-browser>
 
 <os-command-pallette
   connection=":self.connection"
   on:enter_fullscreen="fullscreen"
-  on:open_apps="toggle_explorer"
+  on:open_apps="toggle_state('app_explorer')"
+  on:open_windows="toggle_state('window_browser')"
   on:logout="logout"
 ></os-command-pallette>
 
 <s:for subject=":windows" key="window">
   <os-appwindow
-    app_id=":window.App"
-    name=":window.Name"
+    window=":window"
     connection=":self.connection"
-    location=":window.Location"
-    bounds=":window.Bounds"
     on:closed="CloseWindow(window)"
   ></os-appwindow>
 </s:for>

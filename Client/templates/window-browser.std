@@ -1,0 +1,59 @@
+<s:meta name="os-window-browser">
+  <attr name="windows" type="any"></attr>
+  <attr name="open" type="string"></attr>
+</s:meta>
+
+<script>
+  function focus_window(window) {
+    return () => {
+      self.dispatchEvent(new CustomEvent("focus_window", { detail: window }));
+    };
+  }
+
+  function close_window(window) {
+    return () => {
+      self.dispatchEvent(new CustomEvent("close_window", { detail: window }));
+    };
+  }
+
+  function close_explorer() {
+    self.dispatchEvent(new CustomEvent("explorer_closed"));
+  }
+</script>
+
+<style>
+  @insert ../styles/explorer-grid.pss;
+
+  @if self.open === "window_browser" {
+    :host {
+      opacity: 1;
+      pointer-events: all;
+    }
+  }
+</style>
+
+<div class="close-button">
+  <f-button colour="surface" on:click="close_explorer">
+    <t-icon name="close" colour="surface" text size="h4"></t-icon>
+  </f-button>
+</div>
+
+<div class="content">
+  <l-row>
+    <s:for subject=":self.windows" key="window">
+      <l-col xs="12" sm="6" md="4" lg="3" xl="2">
+        <f-button colour="surface" on:click="focus_window(window)">
+          <img src=":`/apps/${window.App}/public/icon.svg`" />
+          <s:text use=":window.Name" />
+        </f-button>
+        <f-button
+          type="button"
+          colour="warning"
+          on:click="close_window(window)"
+        >
+          <t-icon name="close" colour="warning" text></t-icon>
+        </f-button>
+      </l-col>
+    </s:for>
+  </l-row>
+</div>

@@ -1,9 +1,6 @@
 <s:meta name="os-appwindow">
-  <attr name="app_id" type="string"></attr>
-  <attr name="name" type="string"></attr>
-  <attr name="location" type="string"></attr>
+  <attr name="window" type="any"></attr>
   <attr name="connection" type="any"></attr>
-  <attr name="bounds" type="any"></attr>
 </s:meta>
 
 <script>
@@ -13,7 +10,7 @@
 
   const iframe = CreateRef();
   const corner = CreateRef();
-  const bounds = self.bounds || {
+  const bounds = self.window.Bounds || {
     top: "30px",
     left: "20px",
     width: "400px",
@@ -25,6 +22,11 @@
   let menus = [];
   let z_index = window.counter_top_z_index++;
 
+  self.window.focus = () => {
+    z_index = window.counter_top_z_index++;
+    self.should_render();
+  };
+
   function toggle_menu(item) {
     return () => {
       if (open_menu === item) open_menu = undefined;
@@ -33,12 +35,7 @@
   }
 
   function on_close() {
-    iframe.current.contentWindow.document.dispatchEvent(
-      new CustomEvent("COUNTER_TOP_WINDOW_CLOSING")
-    );
-    setTimeout(() => {
-      self.dispatchEvent(new CustomEvent("closed"));
-    }, 50);
+    self.dispatchEvent(new CustomEvent("closed"));
   }
 
   function on_corner_down(e) {
@@ -96,7 +93,7 @@
       return self.connection.Send(
         "execute",
         "execute",
-        self.app_id,
+        self.window.App,
         command,
         ...args
       );
@@ -173,7 +170,7 @@
   }
 
   .menus {
-    margin: 0 1rem;
+    margin: 0;
     flex: 1;
     text-align: left;
     display: flex;
@@ -218,6 +215,26 @@
   .menu-content .menu-button:hover {
     background: rgba(0, 0, 0, 0.1);
   }
+
+  @media screen and (max-width: 600px) {
+    :host {
+      position: absolute;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    .main-panel {
+      border: none;
+      border-radius: 0;
+    }
+
+    .close-button,
+    .corner {
+      display: none;
+    }
+  }
 </style>
 
 <d-panel class="main-panel" colour="body" bordered>
@@ -245,11 +262,11 @@
       </s:for>
     </div>
     <t-paragraph>
-      <s:text use=":title || self.name" />
+      <s:text use=":title || self.window.Name" />
     </t-paragraph>
   </d-panel>
   <iframe
-    src=":`/apps/${self.app_id}/${self.location}`"
+    src=":`/apps/${self.window.App}/${self.window.Location}`"
     s:ref="iframe"
   ></iframe>
   <div class="corner" on:mousedown="on_corner_down"></div>

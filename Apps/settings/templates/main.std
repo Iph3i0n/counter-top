@@ -25,6 +25,12 @@
     height: 100vh;
   }
 
+  @media screen and (max-width: 500px) {
+    :host {
+      grid-template-columns: auto;
+    }
+  }
+
   .area-button {
     cursor: pointer;
     padding: 0.5rem 1rem;

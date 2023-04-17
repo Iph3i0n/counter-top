@@ -9,7 +9,7 @@
     }
   },
   "tasks": {
-    "install": "deno install --allow-all https://deno.land/x/wholemeal@1.0.5/main.ts",
+    "install": "deno install --allow-all https://deno.land/x/wholemeal@1.0.6/main.ts",
     "server:start": "(cd ./Server && deno task start)",
     "server:prepare": "(cd ./Server && deno task prepare)",
     "ui:dev": "(cd ./Client && deno task dev)",

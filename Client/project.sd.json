@@ -5,7 +5,8 @@
     "./templates/desktop.std",
     "./templates/appwindow.std",
     "./templates/app-explorer.std",
-    "./templates/command-pallette.std"
+    "./templates/command-pallette.std",
+    "./templates/window-browser.std"
   ],
   "description": "The main client for the OS",
   "global_css": "./global.pss",

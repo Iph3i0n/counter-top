@@ -1,0 +1,62 @@
+:host {
+  background-color: rgba(0, 0, 0, 0.5);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  box-sizing: border-box;
+
+  opacity: 0;
+  pointer-events: none;
+
+  transition: opacity 200ms;
+  z-index: 99999;
+}
+
+.content {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+d-panel {
+  width: 12rem;
+  height: 12rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+d-panel t-paragraph {
+  text-align: center;
+}
+
+.close-button {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  cursor: pointer;
+}
+
+.close-button f-button {
+  border-radius: 4rem;
+  width: 2rem;
+  height: 2rem;
+  text-align: center;
+}
+
+.content l-row {
+  width: 100%;
+}
+
+.content l-col {
+  display: flex;
+  justify-content: center;
+}
+
+.content f-button {
+  height: 100%;
+  box-sizing: border-box;
+}

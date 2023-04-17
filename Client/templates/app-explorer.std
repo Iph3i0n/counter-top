@@ -36,64 +36,13 @@
 </script>
 
 <style>
-  :host {
-    background-color: rgba(0, 0, 0, 0.5);
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    box-sizing: border-box;
+  @insert ../styles/explorer-grid.pss;
 
-    opacity: 0;
-    pointer-events: none;
-
-    transition: opacity 200ms;
-    z-index: 99999;
-  }
-
-  @if self.open === "open" {
+  @if self.open === "app_explorer" {
     :host {
       opacity: 1;
       pointer-events: all;
     }
-  }
-
-  .content {
-    display: flex;
-    flex-wrap: wrap;
-    padding: 10rem;
-  }
-
-  d-panel {
-    width: 12rem;
-    height: 12rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-  }
-
-  d-panel t-paragraph {
-    text-align: center;
-  }
-
-  .close-button {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    cursor: pointer;
-  }
-
-  .close-button f-button {
-    border-radius: 4rem;
-    width: 2rem;
-    height: 2rem;
-    text-align: center;
-  }
-
-  f-button {
-    margin: 1rem;
   }
 </style>
 
@@ -104,15 +53,19 @@
 </div>
 
 <div class="content">
-  <s:for subject=":apps" key="app">
-    <div>
-      <f-button colour="surface" on:click="LaunchApp(app)">
-        <img src=":`/apps/${app.id}/public/icon.svg`" />
-        <s:text use=":app.name" />
+  <l-row>
+    <s:for subject=":apps" key="app">
+      <l-col xs="12" sm="6" md="4" lg="3" xl="2">
+        <f-button colour="surface" on:click="LaunchApp(app)">
+          <img src=":`/apps/${app.id}/public/icon.svg`" />
+          <s:text use=":app.name" />
+        </f-button>
         <s:if check=":app.running">
-          <t-badge on:click="CloseApp(app)">X</t-badge>
+          <f-button type="button" colour="warning" on:click="CloseApp(app)">
+            <t-icon name="close" colour="warning" text></t-icon>
+          </f-button>
         </s:if>
-      </f-button>
-    </div>
-  </s:for>
+      </l-col>
+    </s:for>
+  </l-row>
 </div>
