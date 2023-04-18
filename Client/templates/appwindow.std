@@ -21,6 +21,7 @@
   let open_menu;
   let menus = [];
   let z_index = window.counter_top_z_index++;
+  let fullscreen = false;
 
   self.window.focus = () => {
     z_index = window.counter_top_z_index++;
@@ -32,6 +33,10 @@
       if (open_menu === item) open_menu = undefined;
       else open_menu = item;
     };
+  }
+
+  function toggle_fullscreen() {
+    fullscreen = !fullscreen;
   }
 
   function on_close() {
@@ -140,14 +145,24 @@
     border-radius: 0.5rem;
   }
 
-  .close-button {
+  .action-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     width: 1rem;
     height: 1rem;
     border-radius: 1rem;
-    background: #f00;
     cursor: pointer;
     box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.2);
     margin: 0.5rem;
+  }
+
+  .close-button {
+    background: #f00;
+  }
+
+  .fullscreen-button {
+    background: #009600;
   }
 
   .main-panel {
@@ -230,7 +245,26 @@
       border-radius: 0;
     }
 
-    .close-button,
+    .action-button,
+    .corner {
+      display: none;
+    }
+  }
+
+  @if fullscreen {
+    :host {
+      position: absolute;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    .main-panel {
+      border: none;
+      border-radius: 0;
+    }
+
     .corner {
       display: none;
     }
@@ -239,7 +273,17 @@
 
 <d-panel class="main-panel" colour="body" bordered>
   <d-panel class="title-panel" colour="surface">
-    <div class="close-button" on:click="on_close"></div>
+    <div class="action-button close-button" on:click="on_close">
+      <t-icon name="close" size="badge" colour="primary" text></t-icon>
+    </div>
+    <div class="action-button fullscreen-button" on:click="toggle_fullscreen">
+      <t-icon
+        name=":fullscreen ? 'fullscreen-exit' : 'fullscreen'"
+        size="badge"
+        colour="primary"
+        text
+      ></t-icon>
+    </div>
     <div class="menus">
       <s:for subject=":menus" key="menu_item">
         <div
