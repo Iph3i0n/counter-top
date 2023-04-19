@@ -27,12 +27,12 @@ const Server = CreateAppServer(
     }),
     blobs: new ASCII(),
   },
-  {},
-  (c) => {
-    c.OpenWindow("index.html", "File Explorer").then(() => c.EndApp());
-    return c;
-  }
+  {}
 );
+
+Server.CreateHandler("system:focus", ({ OpenWindow }) => {
+  OpenWindow("index.html", "File Explorer");
+});
 
 Server.CreateHandler(
   "open_folder",

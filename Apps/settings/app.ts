@@ -28,12 +28,19 @@ const Server = CreateAppServer(
     }),
   },
   {},
-  async (c) => {
+  async ({
+    UserState,
+    GlobalDir,
+    OpenWindow,
+    OsStore,
+    UserId,
+    UserIsAdmin,
+  }) => {
     const [{ sha: current_commit }] = await fetch(
       "https://api.github.com/repos/counter-top-os/counter-top-apps/commits"
     ).then((r) => r.json());
 
-    if (c.UserState.Model.commits.CURRENT !== current_commit) {
+    if (UserState.Model.commits.CURRENT !== current_commit) {
       const apps_data: Record<string, any> = {};
       const items = await fetch(
         "https://api.github.com/repos/counter-top-os/counter-top-apps/contents/apps"
@@ -46,32 +53,30 @@ const Server = CreateAppServer(
         apps_data[item.name.replace(".json", "")] = data;
       }
 
-      c.UserState.Write({
+      UserState.Write({
         commits: { CURRENT: current_commit },
         apps: apps_data,
       });
     }
 
-    c.OpenWindow("index.html", "Settings", {
-      top: "50px",
-      left: "50px",
-      width: "800px",
-      height: "600px",
-    }).then(() => c.EndApp());
-
-    const ManualDir = Path.join(c.GlobalDir, "manual");
+    const ManualDir = Path.join(GlobalDir, "manual");
 
     function ManualAppPath(app_id: string) {
       return Path.join(ManualDir, app_id);
     }
 
     function StoreAppPath(app_id: string) {
-      return Path.join(c.GlobalDir, "store", app_id);
+      return Path.join(GlobalDir, "store", app_id);
     }
 
     return {
-      ...c,
+      OsStore,
+      OpenWindow,
+      UserState,
+      GlobalDir,
       ManualDir,
+      UserId,
+      UserIsAdmin,
       async ManualAppExists(app_id: string) {
         try {
           const stat = await Deno.stat(ManualAppPath(app_id));
@@ -108,7 +113,7 @@ const Server = CreateAppServer(
           );
           Assert(IsManifest, manifest);
 
-          c.OsStore.Write({
+          OsStore.Write({
             apps: {
               [app_id]: {
                 version: "v1",
@@ -130,6 +135,15 @@ const Server = CreateAppServer(
     };
   }
 );
+
+Server.CreateHandler("system:focus", ({ OpenWindow }) => {
+  OpenWindow("index.html", "Settings", {
+    top: "50px",
+    left: "50px",
+    width: "800px",
+    height: "600px",
+  });
+});
 
 const IsUserModel = IsObject({
   email: Optional(IsString),

@@ -12,10 +12,13 @@ export default function SpawnServer(
   path: string,
   options: WorkerOptions,
   data: any,
-  commands?: Record<string, (...data: any) => any>
+  commands: Record<string, (...data: any) => any> = {}
 ) {
   return new Promise<{
     Send(command: string, ...args: any): Promise<any>;
+    SendNoResponse(command: string, ...args: any): void;
+    AddPostback(command: string, handler: (...data: any) => any): void;
+    ClearPostbacks(): void;
     Close(): void;
   }>(async (res, rej) => {
     const input_path =
@@ -32,36 +35,35 @@ export default function SpawnServer(
 
     const respond = (data: Response) => worker.postMessage(data);
 
-    if (commands)
-      worker.addEventListener("message", async (event) => {
-        const data = event.data;
-        try {
-          await PatternMatch(IsCommand, DoNotCare)(
-            async (data) => {
-              const handler = commands[data.command];
-              if (!handler)
-                respond({
-                  request_id: data.request_id,
-                  response: "not found",
-                });
-              else {
-                const response = await handler(...data.args);
-                respond({
-                  request_id: data.request_id,
-                  response: response,
-                });
-              }
-            },
-            () => {}
-          )(data);
-        } catch (err) {
-          console.error(err);
-          respond({
-            request_id: data.request_id ?? "unknown",
-            response: "unknown error",
-          });
-        }
-      });
+    worker.addEventListener("message", async (event) => {
+      const data = event.data;
+      try {
+        await PatternMatch(IsCommand, DoNotCare)(
+          async (data) => {
+            const handler = commands[data.command];
+            if (!handler)
+              respond({
+                request_id: data.request_id,
+                response: "not found",
+              });
+            else {
+              const response = await handler(...data.args);
+              respond({
+                request_id: data.request_id,
+                response: response,
+              });
+            }
+          },
+          () => {}
+        )(data);
+      } catch (err) {
+        console.error(err);
+        respond({
+          request_id: data.request_id ?? "unknown",
+          response: "unknown error",
+        });
+      }
+    });
 
     const timeout = setTimeout(() => {
       worker.terminate();
@@ -101,6 +103,15 @@ export default function SpawnServer(
     res({
       Send(command, ...args) {
         return send({ command, args });
+      },
+      SendNoResponse(command, ...args) {
+        worker.postMessage({ command, args, request_id: crypto.randomUUID() });
+      },
+      AddPostback(command, handler) {
+        commands[command] = handler;
+      },
+      ClearPostbacks() {
+        commands = {};
       },
       Close() {
         worker.terminate();

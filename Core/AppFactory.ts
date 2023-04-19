@@ -27,54 +27,64 @@ Server.CreateHandler(
     app_id: string,
     ...args: Array<unknown>
   ) => {
-    if (await IsRunning(app_id)) return;
-    console.log("opening app " + app_id);
-    const location = loc.App(app_id);
-    const privileges = [location.global_state, location.user_state];
-    if (location.system_state) privileges.push(location.system_state);
-    RunningApps[app_id] = SpawnServer(
-      location.entry_point,
-      {
-        type: "module",
-        name: app_id,
-        deno: {
-          permissions: {
-            read: privileges,
-            write: privileges,
-            net: "inherit",
+    if (!(await IsRunning(app_id))) {
+      console.log("opening app " + app_id);
+      const location = loc.App(app_id);
+      const privileges = [location.global_state, location.user_state];
+      if (location.system_state) privileges.push(location.system_state);
+      RunningApps[app_id] = SpawnServer(
+        location.entry_point,
+        {
+          type: "module",
+          name: app_id,
+          deno: {
+            permissions: {
+              read: privileges,
+              write: privileges,
+              net: "inherit",
+            },
           },
         },
-      },
-      {
-        location,
-        args,
-        user_id,
-        user_is_admin: Store.Model.users[user_id].is_admin,
-      },
-      {
-        execute: async (
-          app: string,
-          command: string,
-          ...args: Array<unknown>
-        ) => {
-          const instance = await RunningApps[app];
-          if (!instance) return "not running";
+        {
+          location,
+          args,
+          user_id,
+          user_is_admin: Store.Model.users[user_id].is_admin,
+        },
+        {
+          execute: async (
+            app: string,
+            command: string,
+            ...args: Array<unknown>
+          ) => {
+            const instance = await RunningApps[app];
+            if (!instance) return "not running";
 
-          return instance.Send(command, app_id, ...args);
-        },
-        open_window: (location: string, name: string, bounds: unknown) => {
-          return Server.Postback("open_window", app_id, location, name, bounds);
-        },
-        close_app: async () => {
-          const instance = await RunningApps[app_id];
-          if (!instance) return "not running";
-          console.log("closing app" + app_id);
+            return instance.Send(command, app_id, ...args);
+          },
+          open_window: (location: string, name: string, bounds: unknown) => {
+            return Server.Postback(
+              "open_window",
+              app_id,
+              location,
+              name,
+              bounds
+            );
+          },
+          close_app: async () => {
+            const instance = await RunningApps[app_id];
+            if (!instance) return "not running";
+            console.log("closing app" + app_id);
 
-          instance.Close();
-          delete RunningApps[app_id];
-        },
-      }
-    );
+            instance.Close();
+            delete RunningApps[app_id];
+          },
+        }
+      );
+    }
+
+    const instance = await RunningApps[app_id];
+    instance.SendNoResponse("system:focus", "system");
   }
 );
 
