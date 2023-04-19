@@ -1,23 +1,17 @@
 <s:meta name="os-main"></s:meta>
 
 <script>
-  let connection;
+  import Engine from "../utils/app_state.ts";
 
-  $after: {
-    if (connection)
-      connection.OnClose(() => {
-        connection = undefined;
-        self.should_render();
-      });
-  }
+  const { State, Perform } = Engine.Attach(self);
+
+  Perform("Connect", null);
 </script>
 
-<s:if check=":!connection">
-  <os-authenticate
-    on:authenticated="e => connection = e.detail"
-  ></os-authenticate>
+<s:if check=":!State.connection">
+  <os-authenticate></os-authenticate>
 </s:if>
 
-<s:if check="connection">
-  <os-desktop connection=":connection"></os-desktop>
+<s:if check="State.connection">
+  <os-desktop></os-desktop>
 </s:if>

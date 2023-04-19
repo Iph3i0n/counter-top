@@ -1,18 +1,21 @@
 <s:meta name="os-window-browser">
-  <attr name="windows" type="any"></attr>
   <attr name="open" type="string"></attr>
 </s:meta>
 
 <script>
+  import Engine from "../utils/app_state.ts";
+
+  const { State, Perform } = Engine.Attach(self);
+
   function focus_window(window) {
     return () => {
-      self.dispatchEvent(new CustomEvent("focus_window", { detail: window }));
+      window.focus();
     };
   }
 
   function close_window(window) {
     return () => {
-      self.dispatchEvent(new CustomEvent("close_window", { detail: window }));
+      Perform("CloseWindow", window);
     };
   }
 
@@ -40,7 +43,7 @@
 
 <div class="content">
   <l-row>
-    <s:for subject=":self.windows" key="window">
+    <s:for subject=":State.windows" key="window">
       <l-col xs="12" sm="6" md="4" lg="3" xl="2">
         <f-button colour="surface" on:click="focus_window(window)">
           <img src=":`/apps/${window.App}/public/icon.svg`" />

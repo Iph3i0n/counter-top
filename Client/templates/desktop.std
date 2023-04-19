@@ -1,45 +1,18 @@
-<s:meta name="os-desktop">
-  <attr name="connection" type="any"></attr>
-</s:meta>
+<s:meta name="os-desktop"> </s:meta>
 
 <script>
   import key_handlers from "../utils/key_events.ts";
-  import OpenWindowEvent from "../utils/open_window_event.ts";
   import { ClearCookie } from "../utils/cookie.ts";
+  import Engine from "../utils/app_state.ts";
 
-  const session = await self.connection.Send("execute", "session");
+  const { State, Perform } = Engine.Attach(self);
+
   let state = "app_explorer";
-  let windows = [];
-
-  async function LaunchApp(event) {
-    const [id, name] = event.detail;
-    toggle_state("app_explorer")();
-    await self.connection.Send("execute", "load_app", id);
-  }
-
-  async function CloseApp(event) {
-    const [id, name] = event.detail;
-    toggle_state("app_explorer")();
-    await self.connection.Send("execute", "close_app", id);
-    windows = windows.filter((w) => w.App !== id);
-  }
-
-  async function close_window(event) {
-    const window = event.detail;
-    windows = windows.filter((w) => w !== window);
-    window.OnClose();
-  }
 
   function CloseWindow(window) {
-    return async () => {
-      windows = windows.filter((w) => w !== window);
-      window.OnClose();
+    return () => {
+      Perform("CloseWindow", window);
     };
-  }
-
-  function focus_window(event) {
-    const window = event.detail;
-    window.focus();
   }
 
   function toggle_state(target) {
@@ -57,11 +30,6 @@
       },
     })
   );
-
-  document.addEventListener(OpenWindowEvent.Key, (event) => {
-    windows.push(event);
-    self.should_render();
-  });
 
   function open_fullscreen() {
     if (self.requestFullscreen) self.requestFullscreen();
@@ -90,8 +58,7 @@
   }
 
   function logout() {
-    ClearCookie();
-    self.connection.Close();
+    Perform("Logout");
   }
 </script>
 
@@ -101,7 +68,7 @@
     height: 100vh;
     position: relative;
 
-    background: ":`url(/os/public/wallpapers/${session.wallpaper})`";
+    background: ":`url(/os/public/wallpapers/${State.session.wallpaper})`";
     background-size: cover;
 
     overflow: hidden;
@@ -109,33 +76,22 @@
 </style>
 
 <os-app-explorer
-  connection=":self.connection"
   open=":state"
-  on:app_launched="LaunchApp"
-  on:app_closed="CloseApp"
   on:explorer_closed="toggle_state('app_explorer')"
 ></os-app-explorer>
 
 <os-window-browser
   open=":state"
-  windows=":windows"
   on:explorer_closed="toggle_state('window_browser')"
-  on:close_window="close_window"
-  on:focus_window="focus_window"
 ></os-window-browser>
 
 <os-command-pallette
-  connection=":self.connection"
   on:enter_fullscreen="fullscreen"
   on:open_apps="toggle_state('app_explorer')"
   on:open_windows="toggle_state('window_browser')"
   on:logout="logout"
 ></os-command-pallette>
 
-<s:for subject=":windows" key="window">
-  <os-appwindow
-    window=":window"
-    connection=":self.connection"
-    on:closed="CloseWindow(window)"
-  ></os-appwindow>
+<s:for subject=":State.windows" key="window">
+  <os-appwindow window=":window"></os-appwindow>
 </s:for>

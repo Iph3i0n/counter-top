@@ -1,10 +1,12 @@
 <s:meta name="os-appwindow">
   <attr name="window" type="any"></attr>
-  <attr name="connection" type="any"></attr>
 </s:meta>
 
 <script>
   import c from "../utils/class_names.ts";
+  import Engine from "../utils/app_state.ts";
+
+  const { State, Perform } = Engine.Attach(self);
 
   if (!window.counter_top_z_index) window.counter_top_z_index = 1;
 
@@ -40,7 +42,7 @@
   }
 
   function on_close() {
-    self.dispatchEvent(new CustomEvent("closed"));
+    Perform("CloseWindow", self.window);
   }
 
   function on_corner_down(e) {
@@ -95,7 +97,7 @@
   $load: {
     const instance = iframe.current;
     instance.contentWindow.Invoke = function (command, ...args) {
-      return self.connection.Send(
+      return State.connection.Send(
         "execute",
         "execute",
         self.window.App,

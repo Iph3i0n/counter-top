@@ -6,6 +6,7 @@ import {
   Union,
   Literal,
   Array,
+  DateTime,
 } from "../deps/moulding_tin.ts";
 
 export default {
@@ -35,6 +36,14 @@ export default {
       is_admin: new Bool(),
       wallpaper: new ASCII(),
       startup_apps: new Array(new ASCII()),
+    })
+  ),
+  notifications: new Array(
+    new Struct({
+      app: new ASCII(),
+      title: new UTF8(),
+      stamp: new DateTime(),
+      text: new UTF8(),
     })
   ),
 };

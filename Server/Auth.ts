@@ -1,5 +1,5 @@
 import Server from "./Server.ts";
-import { RequireBody, RequireParameters } from "../deps/puristee.ts";
+import { RequireBody } from "../deps/puristee.ts";
 import { IsObject, IsString } from "../deps/type_guard.ts";
 import * as BCrypt from "../deps/bcrypt.ts";
 import { Create } from "./Jwt.ts";
@@ -42,13 +42,20 @@ if (CanRegister)
       };
     });
 
-Server.CreateHandler("/api/auth/token", "GET")
-  .With(RequireParameters({ email: IsString, password: IsString }))
+Server.CreateHandler("/api/auth/token", "POST")
+  .With(
+    RequireBody(
+      IsObject({
+        email: IsString,
+        password: IsString,
+      })
+    )
+  )
   .Register(async (_r, s, _p, c) => {
     for (const [id, value] of s.users) {
-      if (value.email !== c.parameters.email) continue;
+      if (value.email !== c.body.email) continue;
 
-      if (!(await BCrypt.compare(c.parameters.password, value.password)))
+      if (!(await BCrypt.compare(c.body.password, value.password)))
         continue;
 
       return {

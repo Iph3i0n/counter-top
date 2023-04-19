@@ -9,7 +9,7 @@ const key = await crypto.subtle.generateKey(
 export async function Create(user_id: string) {
   return await Jwt.create(
     { alg: "HS512", typ: "JWT" },
-    { user_id, exp: Jwt.getNumericDate(24 * 60 * 60) },
+    { user_id, exp: Jwt.getNumericDate(7 * 24 * 60 * 60) },
     key
   );
 }

@@ -1,15 +1,11 @@
-type Bounding = {
+export type Bounding = {
   top: number;
   left: number;
   width: number;
   height: number;
 };
 
-export default class OpenWindowEvent extends Event {
-  static get Key() {
-    return "COUNTER_TOP_OPEN_WINDOW";
-  }
-
+export default class AppWindow {
   readonly #app: string;
   readonly #location: string;
   readonly #name: string;
@@ -23,7 +19,6 @@ export default class OpenWindowEvent extends Event {
     on_close: () => void,
     bounds?: Bounding
   ) {
-    super(OpenWindowEvent.Key, { bubbles: false, cancelable: false });
     this.#app = app;
     this.#location = location;
     this.#name = name;

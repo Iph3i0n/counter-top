@@ -1,15 +1,11 @@
 <s:meta name="os-authenticate"></s:meta>
 
 <script>
-  import { StartConnection, TryStartConnection } from "../utils/cookie.ts";
-  import SpawnSocket from "../../Interfacing/SocketSpawner.ts";
-  import OpenWindowEvent from "../utils/open_window_event.ts";
+  import Engine from "../utils/app_state.ts";
+
+  const { State, Perform } = Engine.Attach(self);
 
   let mode = "login";
-
-  const existing = await TryStartConnection();
-  if (existing)
-    self.dispatchEvent(new CustomEvent("authenticated", { detail: existing }));
 
   function on_submit_register(e) {
     const data = e.FormData;
@@ -25,26 +21,25 @@
       },
     })
       .then((r) => r.json())
-      .then((j) => StartConnection(j.token))
-      .then((c) =>
-        self.dispatchEvent(new CustomEvent("authenticated", { detail: c }))
-      )
+      .then((j) => Perform("Connect", j.token))
       .catch((err) => console.log("Failed to start connection"));
   }
 
   function on_submit_login(e) {
     const data = e.FormData;
 
-    fetch(
-      `/api/auth/token?email=${encodeURIComponent(
-        data.email
-      )}&password=${encodeURIComponent(data.password)}`
-    )
+    fetch(`/api/auth/token`, {
+      method: "POST",
+      body: JSON.stringify({
+        email: data.email,
+        password: data.password,
+      }),
+      headers: {
+        "content-type": "application/json",
+      },
+    })
       .then((r) => r.json())
-      .then((j) => StartConnection(j.token))
-      .then((c) =>
-        self.dispatchEvent(new CustomEvent("authenticated", { detail: c }))
-      )
+      .then((j) => Perform("Connect", j.token))
       .catch((err) => console.log("Failed to start connection"));
   }
 

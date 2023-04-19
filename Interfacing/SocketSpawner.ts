@@ -7,6 +7,12 @@ import {
 } from "./MessageTypes.ts";
 import { DoNotCare, PatternMatch } from "../deps/type_guard.ts";
 
+export type Connection = {
+  Send(command: string, ...args: any): Promise<any>;
+  Close(): void;
+  OnClose(handler: () => void): void;
+};
+
 export default async function SpawnSocket(
   url: string,
   starting_data: any,
@@ -20,11 +26,7 @@ export default async function SpawnSocket(
       socket.onerror = rej;
     });
 
-  return await new Promise<{
-    Send(command: string, ...args: any): Promise<any>;
-    Close(): void;
-    OnClose(handler: () => void): void;
-  }>((res, rej) => {
+  return await new Promise<Connection>((res, rej) => {
     const respond = (data: Response) => socket.send(JSON.stringify(data));
 
     if (commands)

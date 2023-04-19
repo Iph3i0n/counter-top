@@ -1,6 +1,5 @@
 <s:meta name="os-command-pallette">
   <attr name="fullscreen" type="boolean"></attr>
-  <attr name="connection" type="any"></attr>
 </s:meta>
 
 <script>

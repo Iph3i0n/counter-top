@@ -1,24 +1,19 @@
 <s:meta name="os-app-explorer">
-  <attr name="connection" type="any"></attr>
   <attr name="open" type="string"></attr>
 </s:meta>
 
 <script>
-  let apps = await self.connection.Send("execute", "list_apps");
+  import Engine from "../utils/app_state.ts";
+
+  const { State, Perform } = Engine.Attach(self);
   let running = [];
-
-  function LaunchApp(app) {
-    return () => {
-      self.dispatchEvent(
-        new CustomEvent("app_launched", { detail: [app.id, app.name] })
-      );
-
-      app.running = true;
-    };
-  }
 
   function close_explorer() {
     self.dispatchEvent(new CustomEvent("explorer_closed"));
+  }
+
+  function LaunchApp(app) {
+    return () => Perform("LaunchApp", app.id).then(close_explorer);
   }
 
   function CloseApp(app) {
@@ -26,19 +21,8 @@
     return (e) => {
       e.preventDefault();
       e.stopPropagation();
-      self.dispatchEvent(
-        new CustomEvent("app_closed", { detail: [app.id, app.name] })
-      );
-
-      app.running = false;
+      Perform("CloseApp", app.id).then(close_explorer);
     };
-  }
-
-  $props: {
-    if (event.Key === "open") {
-      apps = await self.connection.Send("execute", "list_apps");
-      self.should_render();
-    }
   }
 </script>
 
@@ -61,7 +45,7 @@
 
 <div class="content">
   <l-row>
-    <s:for subject=":apps" key="app">
+    <s:for subject=":State.installed_apps" key="app">
       <l-col xs="12" sm="6" md="4" lg="3" xl="2">
         <f-button colour="surface" on:click="LaunchApp(app)">
           <img src=":`/apps/${app.id}/public/icon.svg`" />
