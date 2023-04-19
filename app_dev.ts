@@ -12,6 +12,7 @@ function Execute(command: string) {
 
 const APP_KEY = "DEVELOPMENT_APP";
 const DATA_DIR = Path.resolve("./test_data");
+const DOCKER_APP_DIR = "/app-data";
 
 const store = new Directory(
   OsSchema,
@@ -25,8 +26,8 @@ store.Write({
     [APP_KEY]: {
       version: "v1",
       name: data.name,
-      entry_point: Path.resolve(data.main),
-      ui_dir: Path.resolve("."),
+      entry_point: Path.join(DOCKER_APP_DIR, data.main),
+      ui_dir: DOCKER_APP_DIR,
       admin: false,
       system: false,
       release: "Development",
@@ -34,10 +35,10 @@ store.Write({
   },
 });
 
-const pull = Execute("docker pull iph3i0n/counter-top:latest");
-await pull.status();
-const run = Execute(
-  `docker run --name counter_top_test -p 3000:3000 -v ${DATA_DIR}:/data:rw -e ADMIN_USERS=test@test.com:test123 iph3i0n/counter-top:latest`
-);
-
-await run.status();
+await Execute("docker pull iph3i0n/counter-top:latest").status();
+await Execute("docker rm counter_top_test").status();
+await Execute(
+  `docker run --name counter_top_test -p 3000:3000 -v ${DATA_DIR}:/data:rw -v ${Path.resolve(
+    "."
+  )}:${DOCKER_APP_DIR}:rw -e ADMIN_USERS=test@test.com:test123 -e DEV=true iph3i0n/counter-top:latest`
+).status();

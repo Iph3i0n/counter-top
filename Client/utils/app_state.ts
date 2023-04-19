@@ -84,7 +84,8 @@ const Engine = StateEngine(
             connection,
             session: await connection.Send("execute", "session"),
             installed_apps: await connection.Send("execute", "list_apps"),
-            notifications: await connection.Send("execute", "notifications"),
+            notifications:
+              (await connection.Send("execute", "notifications")) ?? [],
           };
         }
         return { connection: null };
@@ -140,7 +141,7 @@ const Engine = StateEngine(
     },
     SetNotifications(data: Array<Notification>) {
       return {
-        notifications: data,
+        notifications: data ?? [],
       };
     },
     async CloseNotification(notification: Notification) {
