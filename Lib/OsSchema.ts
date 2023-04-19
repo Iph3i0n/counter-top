@@ -5,6 +5,7 @@ import {
   Bool,
   Union,
   Literal,
+  Array,
 } from "../deps/moulding_tin.ts";
 
 export default {
@@ -26,6 +27,14 @@ export default {
       password: new ASCII(),
       is_admin: new Bool(),
       wallpaper: new ASCII(),
+    }),
+    new Struct({
+      version: new Literal("v2"),
+      email: new UTF8(),
+      password: new ASCII(),
+      is_admin: new Bool(),
+      wallpaper: new ASCII(),
+      startup_apps: new Array(new ASCII()),
     })
   ),
 };

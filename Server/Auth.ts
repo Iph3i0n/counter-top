@@ -24,11 +24,12 @@ if (CanRegister)
         state: {
           users: {
             [id]: {
-              version: "v1",
+              version: "v2",
               email: c.body.email,
               password: await BCrypt.hash(c.body.password),
               is_admin: false,
               wallpaper: "open-photo.jpeg",
+              startup_apps: [],
             },
           },
         },

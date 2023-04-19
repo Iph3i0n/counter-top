@@ -2,7 +2,13 @@ import CreateAppServer from "../../Interfacing/AppServer.ts";
 import { decode } from "../../deps/base64.ts";
 import * as Path from "../../deps/path.ts";
 import * as Zip from "../../deps/zipjs.ts";
-import { IsObject, IsString, Assert, Optional } from "../../deps/type_guard.ts";
+import {
+  IsObject,
+  IsString,
+  Assert,
+  Optional,
+  IsArray,
+} from "../../deps/type_guard.ts";
 import * as BCrypt from "../../deps/bcrypt.ts";
 import { ASCII, Struct, UTF8, Array } from "../../deps/moulding_tin.ts";
 import { marky } from "../../deps/markdown.ts";
@@ -149,6 +155,7 @@ const IsUserModel = IsObject({
   email: Optional(IsString),
   password: Optional(IsString),
   wallpaper: Optional(IsString),
+  startup_apps: Optional(IsArray(IsString)),
 });
 
 Server.CreateHandler("update_user", ({ OsStore, UserId }, sender, model) => {
@@ -160,13 +167,16 @@ Server.CreateHandler("update_user", ({ OsStore, UserId }, sender, model) => {
   OsStore.Write({
     users: {
       [UserId]: {
-        version: "v1",
+        version: "v2",
         email: model.email ?? existing.email,
         password: model.password
           ? BCrypt.hashSync(model.password)
           : existing.password,
         is_admin: existing.is_admin,
         wallpaper: model.wallpaper ?? existing.wallpaper,
+        startup_apps:
+          model.startup_apps ??
+          (existing.version === "v2" ? existing.startup_apps : []),
       },
     },
   });
@@ -181,7 +191,17 @@ Server.CreateHandler("get_user", ({ OsStore, UserId }, sender) => {
   return {
     email: existing.email,
     wallpaper: existing.wallpaper,
+    startup_apps: existing.version === "v2" ? existing.startup_apps : [],
   };
+});
+
+Server.CreateHandler("apps_list", ({ OsStore }, sender) => {
+  if (sender !== "client") return "denied";
+
+  const result = [];
+  for (const [id, value] of OsStore.Model.apps)
+    result.push({ id, name: value.name });
+  return result;
 });
 
 Server.CreateHandler("is_admin", ({ UserIsAdmin }) => UserIsAdmin);

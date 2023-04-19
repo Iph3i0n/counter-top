@@ -8,19 +8,21 @@ import {
 } from "./MessageTypes.ts";
 import { DoNotCare, PatternMatch } from "../deps/type_guard.ts";
 
+export type WorkerServerInstance = {
+  Send(command: string, ...args: any): Promise<any>;
+  SendNoResponse(command: string, ...args: any): void;
+  AddPostback(command: string, handler: (...data: any) => any): void;
+  ClearPostbacks(): void;
+  Close(): void;
+};
+
 export default function SpawnServer(
   path: string,
   options: WorkerOptions,
   data: any,
   commands: Record<string, (...data: any) => any> = {}
 ) {
-  return new Promise<{
-    Send(command: string, ...args: any): Promise<any>;
-    SendNoResponse(command: string, ...args: any): void;
-    AddPostback(command: string, handler: (...data: any) => any): void;
-    ClearPostbacks(): void;
-    Close(): void;
-  }>(async (res, rej) => {
+  return new Promise<WorkerServerInstance>(async (res, rej) => {
     const input_path =
       Path.toFileUrl(path) +
       (Deno.env.get("DEV") ? `?v=${crypto.randomUUID()}` : "");

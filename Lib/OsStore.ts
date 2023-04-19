@@ -43,11 +43,12 @@ if (initialise)
         (c, n, i) => ({
           ...c,
           [`ADMIN_USER_${i}`]: {
-            version: "v1",
+            version: "v2",
             email: n.email,
             password: BCrypt.hashSync(n.password),
             is_admin: true,
             wallpaper: "open-photo.jpeg",
+            startup_apps: [],
           },
         }),
         {} as any

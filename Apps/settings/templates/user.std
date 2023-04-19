@@ -2,6 +2,7 @@
 
 <script>
   let data = await Invoke("get_user");
+  let app_list = await Invoke("apps_list");
 
   async function on_change_password(e) {
     const data = e.FormData;
@@ -17,6 +18,12 @@
 
   async function update_wallpaper(e) {
     await Invoke("update_user", { wallpaper: e.detail });
+    data = await Invoke("get_user");
+  }
+
+  async function update_startup_apps(e) {
+    const input = e.Value?.split(",").filter((e) => e) ?? [];
+    await Invoke("update_user", { startup_apps: input });
     data = await Invoke("get_user");
   }
 </script>
@@ -44,6 +51,19 @@
       </l-col>
     </l-row>
   </f-form>
+  <l-row>
+    <l-col xs="12">
+      <f-multiselect
+        prefill=":data.startup_apps.join(',')"
+        on:ValueChanged="update_startup_apps"
+      >
+        <span slot="label">Startup Apps</span>
+        <s:for subject=":app_list" key="app">
+          <option value=":app.id"><s:text use=":app.name" /></option>
+        </s:for>
+      </f-multiselect>
+    </l-col>
+  </l-row>
   <settings-wallpaper
     current=":data.wallpaper"
     on:value_change="update_wallpaper"
