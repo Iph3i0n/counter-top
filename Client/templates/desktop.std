@@ -91,6 +91,8 @@
   on:logout="logout"
 ></os-command-pallette>
 
+<os-notifications></os-notifications>
+
 <s:for subject=":State.windows" key="window">
   <os-appwindow window=":window"></os-appwindow>
 </s:for>

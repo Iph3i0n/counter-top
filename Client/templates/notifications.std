@@ -8,8 +8,33 @@
 
 <style>
   :host {
-    position: fixed;
+    position: absolute;
     top: 0;
     right: 0;
+
+    padding: 1rem;
+    box-sizing: border-box;
+    max-width: 320px;
+    max-height: 100vh;
+  }
+
+  o-toast {
+    position: static;
+    width: 100%;
+    margin: 0 0 1rem 0;
   }
 </style>
+
+<div>
+  <s:for subject=":State.notifications" key="item">
+    <o-toast
+      icon=":`/apps/${item.app}/public/icon.svg`"
+      on:CloseRequested="() => Perform('CloseNotification', item)"
+    >
+      <span slot="title"><s:text use=":item.title" /></span>
+      <t-paragraph>
+        <s:text use=":item.text" />
+      </t-paragraph>
+    </o-toast>
+  </s:for>
+</div>
