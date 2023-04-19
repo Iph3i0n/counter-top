@@ -31,6 +31,7 @@ type BasicContext<TLocal extends Schema, TGlobal extends Schema> = {
   readonly GlobalState: Directory<TGlobal>;
   OpenWindow(location: string, name: string, bounds?: Bounds): Promise<void>;
   EndApp(): Promise<void>;
+  Notify(title: string, text: string): void;
   readonly UserId: string;
   readonly UserDir: string;
   readonly UserIsAdmin: boolean;
@@ -76,6 +77,10 @@ export default function CreateAppServer<
 
       EndApp(): Promise<void> {
         return result.Postback("close_app");
+      },
+
+      Notify(title: string, text: string) {
+        result.Postback("notify", title, text);
       },
 
       get UserId() {

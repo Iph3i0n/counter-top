@@ -40,6 +40,7 @@ export default {
   ),
   notifications: new Array(
     new Struct({
+      id: new ASCII(),
       app: new ASCII(),
       title: new UTF8(),
       stamp: new DateTime(),

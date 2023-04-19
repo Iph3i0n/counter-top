@@ -15,7 +15,10 @@ for (const [id, value] of Store.Model.users) {
         permissions: "inherit",
       },
     },
-    { user_id: id }
+    { user_id: id },
+    {
+      open_window: () => {},
+    }
   );
 
   instances[id] = input;
@@ -51,6 +54,11 @@ export default function MakeConnection(socket: WebSocket, user_id: string) {
         });
       }
     );
+
+    worker.AddPostback("notifications", (data: any) =>
+      server.Postback("notifications", data)
+    );
+
     socket.onclose = () => {
       for (const close of windows) close();
       worker.ClearPostbacks();

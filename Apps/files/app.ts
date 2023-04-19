@@ -30,8 +30,9 @@ const Server = CreateAppServer(
   {}
 );
 
-Server.CreateHandler("system:focus", ({ OpenWindow }) => {
+Server.CreateHandler("system:focus", ({ OpenWindow, Notify }) => {
   OpenWindow("index.html", "File Explorer");
+  Notify("Started", "The file explorer has started.");
 });
 
 Server.CreateHandler(

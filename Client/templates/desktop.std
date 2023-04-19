@@ -2,7 +2,6 @@
 
 <script>
   import key_handlers from "../utils/key_events.ts";
-  import { ClearCookie } from "../utils/cookie.ts";
   import Engine from "../utils/app_state.ts";
 
   const { State, Perform } = Engine.Attach(self);

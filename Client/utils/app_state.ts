@@ -15,12 +15,21 @@ type InstalledApp = {
   running: boolean;
 };
 
+type Notification = {
+  id: string;
+  app: string;
+  title: string;
+  stamp: Date;
+  text: string;
+};
+
 const Engine = StateEngine(
   {
     connection: null as null | Connection,
     session: null as null | Session,
     windows: [] as Array<AppWindow>,
     installed_apps: [] as Array<InstalledApp>,
+    notifications: [] as Array<Notification>,
   },
   {
     async Connect(token: string | null) {
@@ -55,6 +64,17 @@ const Engine = StateEngine(
                   );
                 });
               },
+              notifications: (data: any) => {
+                Engine.Perform(
+                  "SetNotifications",
+                  data.map((d: any) => ({
+                    app: d.app,
+                    title: d.title,
+                    stamp: new Date(d.stamp),
+                    text: d.text,
+                  }))
+                );
+              },
             }
           );
 
@@ -64,6 +84,7 @@ const Engine = StateEngine(
             connection,
             session: await connection.Send("execute", "session"),
             installed_apps: await connection.Send("execute", "list_apps"),
+            notifications: await connection.Send("execute", "notifications"),
           };
         }
         return { connection: null };
@@ -114,6 +135,24 @@ const Engine = StateEngine(
       return {
         installed_apps: this.installed_apps.map((i) =>
           i.id === app_id ? { ...i, running: false } : i
+        ),
+      };
+    },
+    SetNotifications(data: Array<Notification>) {
+      return {
+        notifications: data,
+      };
+    },
+    async CloseNotification(notification: Notification) {
+      await this.connection?.Send(
+        "execute",
+        "clear_notification",
+        notification.id
+      );
+
+      return {
+        notifications: this.notifications.filter(
+          (n) => n.id !== notification.id
         ),
       };
     },

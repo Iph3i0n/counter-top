@@ -84,7 +84,13 @@ Server.CreateHandler(
               notifications: {
                 [user_id]: [
                   ...existing,
-                  { app: app_id, stamp: new Date(), title, text },
+                  {
+                    id: crypto.randomUUID(),
+                    app: app_id,
+                    stamp: new Date(),
+                    title,
+                    text,
+                  },
                 ],
               },
             });
@@ -115,6 +121,17 @@ Server.CreateHandler(
 
 Server.CreateHandler("notifications", ({ user_id }) => {
   return Store.Model.notifications[user_id];
+});
+
+Server.CreateHandler("clear_notification", ({ user_id }, id: string) => {
+  const existing = Store.Model.notifications[user_id];
+  if (!existing) return "not found";
+
+  Store.Write({
+    notifications: {
+      [user_id]: existing.filter((e) => e.id !== id),
+    },
+  });
 });
 
 Server.CreateHandler("list_apps", ({ IsRunning }) => {

@@ -28,6 +28,7 @@ export default function StateEngine<
         ...(await actions[action].bind(current_value)(...args)),
       };
 
+      console.log(action, args, current_value);
       document.dispatchEvent(new CustomEvent("__STATE_ENGINE_UPDATED__"));
     },
   };

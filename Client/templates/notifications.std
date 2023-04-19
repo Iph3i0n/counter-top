@@ -1,0 +1,15 @@
+<s:meta name="os-notifications"></s:meta>
+
+<script>
+  import Engine from "../utils/app_state.ts";
+
+  const { State, Perform } = Engine.Attach(self);
+</script>
+
+<style>
+  :host {
+    position: fixed;
+    top: 0;
+    right: 0;
+  }
+</style>
